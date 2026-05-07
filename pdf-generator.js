@@ -34,8 +34,38 @@ async function buildPDFBlob(){
   const R=(x,y,w,h,c)=>page.drawRectangle({x,y,width:w,height:h,color:c,borderWidth:0});
   const SR=(x,y,w,h,c,lw=.5)=>page.drawRectangle({x,y,width:w,height:h,borderColor:c,borderWidth:lw,color:undefined});
   const L=(x1,y1,x2,y2,c,lw=.35)=>page.drawLine({start:{x:x1,y:y1},end:{x:x2,y:y2},color:c,thickness:lw});
-  // Nettoie les caractères non supportés par WinAnsi (ex: \n 0x000a, \r, etc.)
-  const san=(s)=>String(s||'').replace(/[\x00-\x08\x0A-\x1F\x7F]/g,' ').trim();
+  // Translittère vers WinAnsi (pdf-lib Helvetica standard ne supporte pas l'Unicode haut)
+  const san=(s)=>{
+    const map={'\n':' ','\r':' ','\t':' ',
+      '\u2018':"'",'\u2019':"'",'\u201A':"'",'\u201B':"'",
+      '\u201C':'"','\u201D':'"','\u201E':'"','\u201F':'"',
+      '\u2013':'-','\u2014':'-','\u2015':'-','\u2026':'...',
+      '\u00D7':'x','\u00F7':'/','\u2212':'-',
+      '\u03A9':'Ohm','\u03BC':'u',
+      '\u00E0':'a','\u00E1':'a','\u00E2':'a','\u00E4':'ae',
+      '\u00E8':'e','\u00E9':'e','\u00EA':'e','\u00EB':'e',
+      '\u00EC':'i','\u00ED':'i','\u00EE':'i','\u00EF':'i',
+      '\u00F2':'o','\u00F3':'o','\u00F4':'o','\u00F6':'oe',
+      '\u00F9':'u','\u00FA':'u','\u00FB':'u','\u00FC':'ue',
+      '\u00C0':'A','\u00C1':'A','\u00C2':'A','\u00C4':'Ae',
+      '\u00C8':'E','\u00C9':'E','\u00CA':'E','\u00CB':'E',
+      '\u00CC':'I','\u00CD':'I','\u00CE':'I','\u00CF':'I',
+      '\u00D2':'O','\u00D3':'O','\u00D4':'O','\u00D6':'Oe',
+      '\u00D9':'U','\u00DA':'U','\u00DB':'U','\u00DC':'Ue',
+      '\u00C7':'C','\u00E7':'c','\u00D1':'N','\u00F1':'n',
+      '\u00DF':'ss','\u00E6':'ae','\u0152':'Oe','\u0153':'oe',
+      '\u2022':'-','\u2713':'OK','\u2714':'OK',
+      '\u00BD':'1/2','\u00BC':'1/4','\u00BE':'3/4',
+      '\u00A9':'(c)','\u00AE':'(R)','\u2122':'TM',
+    };
+    return String(s||'').split('').map(ch=>{
+      const code=ch.codePointAt(0);
+      if(map[ch]!==undefined)return map[ch];
+      if(code<32||code===127)return ' ';
+      if(code>255)return '?';
+      return ch;
+    }).join('').trim();
+  };
   const Txt=(s,x,y,sz,f,c)=>{if(!s)return;page.drawText(san(s),{x,y,size:sz,font:f,color:c});};
   const TxtR=(s,xR,y,sz,f,c)=>{if(!s)return;const ss=san(s);const w=f.widthOfTextAtSize(ss,sz);page.drawText(ss,{x:xR-w,y,size:sz,font:f,color:c});};
   const TxtC=(s,x,w,y,sz,f,c)=>{if(!s)return;const ss=san(s);const tw=f.widthOfTextAtSize(ss,sz);page.drawText(ss,{x:x+(w-tw)/2,y,size:sz,font:f,color:c});};
@@ -57,7 +87,7 @@ async function buildPDFBlob(){
   // 2. BANDEAU INFO
   const IY=H-HH,IH=13*MM;
   R(0,IY-IH,W,IH,LGRAY);SR(0,IY-IH,W,IH,MGRAY,.4);
-  const kv=(lbl,val,x,y,mxV)=>{Txt(lbl,x,y,6.5,fB,NAVY);const lw=fB.widthOfTextAtSize(lbl,6.5);Txt(clip(val,mxV||80*MM,6.5,fR),x+lw+2,y,6.5,fR,BLACK);};
+  const kv=(lbl,val,x,y,mxV)=>{const slbl=san(lbl);Txt(slbl,x,y,6.5,fB,NAVY);const lw=fB.widthOfTextAtSize(slbl,6.5);Txt(clip(val,mxV||80*MM,6.5,fR),x+lw+2,y,6.5,fR,BLACK);};
   kv(T.pdfObjet,D.objet,ML,IY-IH+8.5*MM,55*MM);
   kv(T.pdfNumTab,D.num_tableau,95*MM,IY-IH+8.5*MM,30*MM);
   kv(T.pdfNumCpt,D.num_compteur,ML,IY-IH+3.5*MM,40*MM);
