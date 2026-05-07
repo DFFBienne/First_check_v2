@@ -3,12 +3,19 @@
 async function generatePDF(){
   saveData();
   const btn=$('pdfBtn');btn.disabled=true;$('btn-pdf-lbl').textContent=I18N[currentLang].pdfLoading;
-  try{await buildPDF();showToast(I18N[currentLang].pdfOk);}
+  try{
+    const {blob,filename}=await buildPDFBlob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=filename;a.target='_blank';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),3000);
+    showToast(I18N[currentLang].pdfOk);
+  }
   catch(e){console.error(e);showToast('Erreur: '+e.message,4000);}
   finally{btn.disabled=false;$('btn-pdf-lbl').textContent=I18N[currentLang].btnPdf;}
 }
 
-async function buildPDF(){
+async function buildPDFBlob(){
   const {PDFDocument,rgb,StandardFonts}=PDFLib;
   const T=I18N[currentLang];
   const doc=await PDFDocument.create();
@@ -160,9 +167,6 @@ async function buildPDF(){
 
   const bytes=await doc.save();
   const blob=new Blob([bytes],{type:'application/pdf'});
-  const url=URL.createObjectURL(blob);
-  const fname='Protocole_'+(D.num_tableau||'T00').replace(/\s/g,'_')+'_'+(D.date_sig||new Date().toISOString().slice(0,10))+'.pdf';
-  const a=document.createElement('a');a.href=url;a.download=fname;a.target='_blank';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url),3000);
+  const filename='Protocole_'+(D.num_tableau||'T00').replace(/\s/g,'_')+'_'+(D.date_sig||new Date().toISOString().slice(0,10))+'.pdf';
+  return {blob, filename};
 }
