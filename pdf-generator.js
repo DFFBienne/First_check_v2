@@ -1,14 +1,5 @@
-// pdf-generator.js — Génération PDF côté client via pdf-lib
-
-async function generatePDF(){
-  saveData();
-  const btn=$('pdfBtn');btn.disabled=true;$('btn-pdf-lbl').textContent=I18N[currentLang].pdfLoading;
-  try{await buildPDF();showToast(I18N[currentLang].pdfOk);}
-  catch(e){console.error(e);showToast('Erreur: '+e.message,4000);}
-  finally{btn.disabled=false;$('btn-pdf-lbl').textContent=I18N[currentLang].btnPdf;}
-}
-
-async function buildPDF(){
+/* Génération PDF */
+async function buildPDFBlob(){
   const {PDFDocument,rgb,StandardFonts}=PDFLib;
   const T=I18N[currentLang];
   const doc=await PDFDocument.create();
@@ -16,39 +7,16 @@ async function buildPDF(){
   const {width:W,height:H}=page.getSize();
   const fB=await doc.embedFont(StandardFonts.HelveticaBold);
   const fR=await doc.embedFont(StandardFonts.Helvetica);
+  // Logo : source unique = LOGO_B64 de logo.js (ne plus en recopier le contenu dans ce fichier)
+  let logoJpgImg=null;
+  try{
+    const b64=(typeof LOGO_B64==='string'?LOGO_B64:'').replace(/^data:[^,]*,/,'').replace(/\s+/g,'');
+    const u=Uint8Array.from(atob(b64),c=>c.charCodeAt(0)),n=u.length;
+    if(n>4&&u[0]===0xFF&&u[1]===0xD8&&u[n-2]===0xFF&&u[n-1]===0xD9)logoJpgImg=await doc.embedJpg(u);
+    else console.warn('Logo ignoré : LOGO_B64 absent ou invalide');
+  }catch(e){console.warn('Logo non intégré au PDF :',e);}
 
-  // Logo SBB CFF FFS (défini dans logo.js) : PNG sans perte en priorité, JPEG en secours.
-  // Les données sont vérifiées avant intégration ; un logo abîmé est ignoré (texte à la place).
-  let logoImg=null;
-  const b64Bytes=v=>Uint8Array.from(atob(String(v).replace(/^data:[^,]*,/,'').replace(/\s+/g,'')),c=>c.charCodeAt(0));
-  const u32=(u,p)=>((u[p]<<24)|(u[p+1]<<16)|(u[p+2]<<8)|u[p+3])>>>0;
-  // PNG : signature + somme de contrôle (CRC) de chaque bloc jusqu'à IEND
-  const pngOk=u=>{
-    if(![0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A].every((x,i)=>u[i]===x))return false;
-    let p=8;
-    while(p+12<=u.length){
-      const end=p+12+u32(u,p);if(end>u.length)return false;
-      let c=0xFFFFFFFF;
-      for(let i=p+4;i<end-4;i++){c^=u[i];for(let k=0;k<8;k++)c=(c>>>1)^(0xEDB88320&-(c&1));}
-      if(((c^0xFFFFFFFF)>>>0)!==u32(u,end-4))return false;
-      if(u32(u,p+4)===0x49454E44)return end===u.length; // bloc IEND = fin du fichier
-      p=end;
-    }
-    return false;
-  };
-  // JPEG : marqueurs de début (FFD8) et de fin (FFD9) présents
-  const jpgOk=u=>u.length>4&&u[0]===0xFF&&u[1]===0xD8&&u[u.length-2]===0xFF&&u[u.length-1]===0xD9;
-  const logoSources=[
-    {b64:typeof LOGO_PNG_B64==='string'?LOGO_PNG_B64:'',ok:pngOk,embed:u=>doc.embedPng(u)},
-    {b64:typeof LOGO_B64==='string'?LOGO_B64:'',ok:jpgOk,embed:u=>doc.embedJpg(u)}
-  ];
-  for(const src of logoSources){
-    if(logoImg||!src.b64)continue;
-    try{const u=b64Bytes(src.b64);if(src.ok(u))logoImg=await src.embed(u);else console.warn('Logo ignoré : données invalides');}
-    catch(e){console.warn('Logo non intégré au PDF :',e);}
-  }
-
-  const NAVY=rgb(.102,.180,.369),NAVY2=rgb(.141,.220,.439),NAVY3=rgb(.176,.259,.502);
+  const NAVY=rgb(.102,.180,.369),NAVY2=rgb(.102,.180,.369),NAVY3=rgb(.102,.180,.369);
   const WHITE=rgb(1,1,1);
   const LGRAY=rgb(.941,.945,.969),LG2=rgb(.910,.914,.957),MGRAY=rgb(.816,.820,.847);
   const DGRAY=rgb(.314,.353,.431),BLACK=rgb(.102,.102,.180);
@@ -58,102 +26,192 @@ async function buildPDF(){
   const R=(x,y,w,h,c)=>page.drawRectangle({x,y,width:w,height:h,color:c,borderWidth:0});
   const SR=(x,y,w,h,c,lw=.5)=>page.drawRectangle({x,y,width:w,height:h,borderColor:c,borderWidth:lw,color:undefined});
   const L=(x1,y1,x2,y2,c,lw=.35)=>page.drawLine({start:{x:x1,y:y1},end:{x:x2,y:y2},color:c,thickness:lw});
-  const Txt=(s,x,y,sz,f,c)=>{if(!s)return;page.drawText(String(s),{x,y,size:sz,font:f,color:c});};
-  const TxtR=(s,xR,y,sz,f,c)=>{if(!s)return;const w=f.widthOfTextAtSize(String(s),sz);page.drawText(String(s),{x:xR-w,y,size:sz,font:f,color:c});};
-  const TxtC=(s,x,w,y,sz,f,c)=>{if(!s)return;const tw=f.widthOfTextAtSize(String(s),sz);page.drawText(String(s),{x:x+(w-tw)/2,y,size:sz,font:f,color:c});};
-  const clip=(s,mxW,sz,f)=>{let r=String(s||'');while(r.length>0&&f.widthOfTextAtSize(r,sz)>mxW)r=r.slice(0,-1);return r;};
+
+  // Translittère vers WinAnsi (pdf-lib Helvetica standard ne supporte pas l'Unicode haut)
+  const san=(s)=>{
+    const map={'\n':' ','\r':' ','\t':' ',
+      '\u2018':"'",'\u2019':"'",'\u201A':"'",'\u201B':"'",
+      '\u201C':'"','\u201D':'"','\u201E':'"','\u201F':'"',
+      '\u2013':'-','\u2014':'-','\u2015':'-','\u2026':'...',
+      '\u00D7':'x','\u00F7':'/','\u2212':'-',
+      '\u03A9':'Ohm','\u03BC':'u',
+      '\u00E0':'a','\u00E1':'a','\u00E2':'a','\u00E4':'ae',
+      '\u00E8':'e','\u00E9':'e','\u00EA':'e','\u00EB':'e',
+      '\u00EC':'i','\u00ED':'i','\u00EE':'i','\u00EF':'i',
+      '\u00F2':'o','\u00F3':'o','\u00F4':'o','\u00F6':'oe',
+      '\u00F9':'u','\u00FA':'u','\u00FB':'u','\u00FC':'ue',
+      '\u00C0':'A','\u00C1':'A','\u00C2':'A','\u00C4':'Ae',
+      '\u00C8':'E','\u00C9':'E','\u00CA':'E','\u00CB':'E',
+      '\u00CC':'I','\u00CD':'I','\u00CE':'I','\u00CF':'I',
+      '\u00D2':'O','\u00D3':'O','\u00D4':'O','\u00D6':'Oe',
+      '\u00D9':'U','\u00DA':'U','\u00DB':'U','\u00DC':'Ue',
+      '\u00C7':'C','\u00E7':'c','\u00D1':'N','\u00F1':'n',
+      '\u00DF':'ss','\u00E6':'ae','\u0152':'Oe','\u0153':'oe',
+      '\u2022':'-','\u2713':'OK','\u2714':'OK',
+      '\u00BD':'1/2','\u00BC':'1/4','\u00BE':'3/4',
+      '\u00A9':'(c)','\u00AE':'(R)','\u2122':'TM',
+    };
+    return String(s||'').split('').map(ch=>{
+      const code=ch.codePointAt(0);
+      if(map[ch]!==undefined)return map[ch];
+      if(code<32||code===127)return ' ';
+      if(code>255)return '?';
+      return ch;
+    }).join('').trim();
+  };
+
+  const Txt=(s,x,y,sz,f,c)=>{if(!s)return;page.drawText(san(s),{x,y,size:sz,font:f,color:c});};
+  const TxtR=(s,xR,y,sz,f,c)=>{if(!s)return;const ss=san(s);const w=f.widthOfTextAtSize(ss,sz);page.drawText(ss,{x:xR-w,y,size:sz,font:f,color:c});};
+  const TxtC=(s,x,w,y,sz,f,c)=>{if(!s)return;const ss=san(s);const tw=f.widthOfTextAtSize(ss,sz);page.drawText(ss,{x:x+(w-tw)/2,y,size:sz,font:f,color:c});};
+  const clip=(s,mxW,sz,f)=>{let r=san(s);while(r.length>0&&f.widthOfTextAtSize(r,sz)>mxW)r=r.slice(0,-1);return r;};
 
   const D={};
-  ['nom_installation','num_tableau','page','objet','num_compteur','cc_general','cc_abonne','tension','instrument','num_inventaire','facteur_icc','valeur_facteur','nom_prenom','lieu','date_sig','remarques'].forEach(k=>D[k]=gv(k));
+  ['nom_installation','num_tableau','page','objet','num_compteur','fournisseur','remarques_install','cc_general','cc_abonne','tension','instrument','num_inventaire','facteur_icc','valeur_facteur','nom_prenom','lieu','date_sig','remarques'].forEach(k=>D[k]=gv(k));
   D.vc={};for(let i=1;i<=8;i++)D.vc['vc'+i]=gv('vc'+i);
-  D.circuits=circuitIds.filter(id=>!!$('cc-'+id)).map(id=>({desig:gv('desig_'+id),ctype:gv('ctype_'+id),csect:gv('csect_'+id),courbe:gv('courbe_'+id),inom:gv('inom_'+id),icc_max_lpe:gv('icc_max_lpe_'+id),icc_min_lpe:gv('icc_min_lpe_'+id),icc_max_ln:gv('icc_max_ln_'+id),icc_min_ln:gv('icc_min_ln_'+id),riso:gv('riso_'+id),rlo:gv('rlo_'+id),ddr_inom:gv('ddr_inom_'+id),ddr_idelta:gv('ddr_idelta_'+id),ddr_temps:gv('ddr_temps_'+id),champ:gv('champ_'+id),chute:gv('chute_'+id)}));
+  D.circuits=circuitIds.filter(id=>!!$('cc-'+id)).map(id=>({groupe:gv('groupe_'+id),desig:gv('desig_'+id),ctype:gv('ctype_'+id),csect:gv('csect_'+id),courbe:gv('courbe_'+id),inom:gv('inom_'+id),icc_max_lpe:gv('icc_max_lpe_'+id),icc_min_lpe:gv('icc_min_lpe_'+id),icc_max_ln:gv('icc_max_ln_'+id),icc_min_ln:gv('icc_min_ln_'+id),riso:gv('riso_'+id),rlo:gv('rlo_'+id),ddr_inom:gv('ddr_inom_'+id),ddr_idelta:gv('ddr_idelta_'+id),ddr_temps:gv('ddr_temps_'+id),champ:gv('champ_'+id),chute:gv('chute_'+id),rem:gv('rem_'+id),
+    collab_nom:(($('collab_signed_'+id)&&$('collab_signed_'+id).checked)?gv('nom_prenom'):(gv('collab_nom_'+id)||'')),
+    collab_sig:(($('collab_signed_'+id)&&$('collab_signed_'+id).checked)?(sigData||''):(gv('collab_sig_'+id)||''))
+  }));
 
-  // 1. HEADER
-  const HH=20*MM;
-  R(0,H-HH,W,HH,NAVY);
-  Txt(T.pdfTitle,ML,H-HH+13*MM,8.5,fB,WHITE);
-  Txt(T.pdfNomInst+"  "+clip(D.nom_installation,200*MM,7,fR),ML,H-HH+7*MM,7,fR,WHITE);
-  // Logo en haut à droite (remplacé par le texte seulement si l'image est indisponible)
-  if(logoImg){
-    const logoH=4*MM,logoW=logoH*(logoImg.width/logoImg.height);
-    page.drawImage(logoImg,{x:W-MR-logoW,y:H-HH+12*MM,width:logoW,height:logoH});
-  }else TxtR("SBB CFF FFS",W-MR,H-HH+13*MM,11,fB,WHITE);
-  TxtR(T.pdfPage+" "+(D.page||'01'),W-MR,H-HH+7*MM,7,fR,WHITE);
+  // 1. HEADER — aligné sur les marges du tableau
+  const HH=15*MM;
+  R(ML,H-HH,W-ML-MR,HH,NAVY);
+  Txt(T.pdfTitle,ML+2*MM,H-HH+9*MM,8,fB,WHITE);
+  Txt(T.pdfNomInst+"  "+clip(D.nom_installation,180*MM,6.5,fR),ML+2*MM,H-HH+3.5*MM,6.5,fR,WHITE);
+  // Page number top-right, logo à sa gauche
+  TxtR(T.pdfPage+" "+(D.page||'01'),W-MR-2*MM,H-HH+HH/2,7,fR,WHITE);
+  if(logoJpgImg){
+    const logoH=4*MM, logoW=logoH*(logoJpgImg.width/logoJpgImg.height);
+    page.drawImage(logoJpgImg,{x:W-MR-2*MM-logoW-15*MM, y:H-HH+(HH-logoH)/2, width:logoW, height:logoH});
+  }else TxtR("SBB CFF FFS",W-MR-2*MM-15*MM,H-HH+HH/2,9,fB,WHITE);
 
-  // 2. BANDEAU INFO
-  const IY=H-HH,IH=13*MM;
-  R(0,IY-IH,W,IH,LGRAY);SR(0,IY-IH,W,IH,MGRAY,.4);
-  const kv=(lbl,val,x,y,mxV)=>{Txt(lbl,x,y,6.5,fB,NAVY);const lw=fB.widthOfTextAtSize(lbl,6.5);Txt(clip(val,mxV||80*MM,6.5,fR),x+lw+2,y,6.5,fR,BLACK);};
-  kv(T.pdfObjet,D.objet,ML,IY-IH+8.5*MM,55*MM);
-  kv(T.pdfNumTab,D.num_tableau,95*MM,IY-IH+8.5*MM,30*MM);
-  kv(T.pdfNumCpt,D.num_compteur,ML,IY-IH+3.5*MM,40*MM);
-  kv(T.pdfCcGen,D.cc_general||"—",75*MM,IY-IH+3.5*MM,50*MM);
-  kv(T.pdfCcAbo,D.cc_abonne||"—",175*MM,IY-IH+3.5*MM,45*MM);
+  // 2. BANDEAU INFO — aligné sur les marges du tableau
+  const hasExtra = !!(D.fournisseur || D.remarques_install);
+  const IH = hasExtra ? 18*MM : 13*MM;
+  const IY=H-HH;
+  R(ML,IY-IH,W-ML-MR,IH,LGRAY);SR(ML,IY-IH,W-ML-MR,IH,MGRAY,.4);
+  const kv=(lbl,val,x,y,mxV)=>{const slbl=san(lbl);Txt(slbl,x,y,6.5,fB,NAVY);const lw=fB.widthOfTextAtSize(slbl,6.5);Txt(clip(val,mxV||80*MM,6.5,fR),x+lw+2,y,6.5,fR,BLACK);};
+  const ly1 = hasExtra ? IY-IH+13.5*MM : IY-IH+8.5*MM;
+  const ly2 = hasExtra ? IY-IH+8.5*MM  : IY-IH+3.5*MM;
+  kv(T.pdfObjet,D.objet,ML+2*MM,ly1,55*MM);
+  kv(T.pdfNumTab,D.num_tableau,95*MM,ly1,30*MM);
+  kv(T.pdfNumCpt,D.num_compteur,ML+2*MM,ly2,40*MM);
+  kv(T.pdfCcGen,D.cc_general||"—",75*MM,ly2,50*MM);
+  kv(T.pdfCcAbo,D.cc_abonne||"—",175*MM,ly2,45*MM);
+  if(hasExtra){
+    const ly3=IY-IH+3.5*MM;
+    if(D.fournisseur) kv(T.pdfFournisseur||'Fournisseur:',D.fournisseur,ML+2*MM,ly3,80*MM);
+    if(D.remarques_install){
+      const remLbl=T.pdfRemarquesInstall||'Remarques:';
+      const remX=D.fournisseur?140*MM:ML+2*MM;
+      kv(remLbl,D.remarques_install,remX,ly3,W-MR-remX-10*MM);
+    }
+  }
 
   // 3. TABLEAU
-  // Col 0-16 : données mesures | Col 17 : Collaborateur (Nom Prénom + ligne signature)
   const BZH=57*MM,TBOT=6*MM+BZH,TTOP=IY-IH,TH=TTOP-TBOT,TW=W-ML-MR;
-  const rawCW=[7,33,11,12,10,9,12,12,12,12,10,10,10,10,9,10,11,22];
+  const rawCW=[7,26,10,11,9,8,11,11,11,11,9,9,9,9,8,9,9,18,20];
   const sumCW=rawCW.reduce((a,b)=>a+b,0);
   const CW=rawCW.map(x=>(x/sumCW)*TW);
   const colX=ci=>{let x=ML;for(let i=0;i<ci;i++)x+=CW[i];return x;};
-  const NRD=14;let circuits=[...D.circuits];while(circuits.length<NRD)circuits.push({});
-  const HRA=6.5*MM,HRB=8*MM,HRD=Math.max(Math.min((TH-HRA-HRB)/NRD,5.5*MM),3.5*MM);
-  const rowY=ri=>ri===0?TBOT+TH-HRA:ri===1?TBOT+TH-HRA-HRB:TBOT+TH-HRA-HRB-(ri-2)*HRD;
+  const HRA=6.5*MM,HRB=8*MM;
+  const NRD=18;
+  const HRD=Math.max(Math.min((TH-HRA-HRB)/NRD, 5.5*MM), 3.2*MM);
+  let circuits=[...D.circuits];while(circuits.length<NRD)circuits.push({});
+  const dataRowY = i => TTOP - HRA - HRB - (i+1)*HRD;
+  const headerAY = TTOP - HRA;
+  const headerBY = TTOP - HRA - HRB;
 
-  // Fond des lignes alternées
-  for(let ri=2;ri<2+NRD;ri++){if(ri%2===0)R(ML,rowY(ri),TW,HRD,LGRAY);}
+  // Alternance lignes data
+  for(let i=0;i<NRD;i++){if(i%2===0)R(ML,dataRowY(i),TW,HRD,LGRAY);}
 
-  // Bandes de couleur en-tête groupes (ligne 0)
-  [{c:[0,1],col:NAVY},{c:[2,3],col:NAVY2},{c:[4,5],col:NAVY2},{c:[6,7,8,9,10,11],col:NAVY3},{c:[12,13,14],col:NAVY2},{c:[15,16],col:NAVY2},{c:[17],col:NAVY}].forEach(g=>{
-    const x=colX(g.c[0]),w=g.c.reduce((a,c)=>a+CW[c],0);R(x,rowY(0),w,HRA,g.col);
-  });
-  R(ML,rowY(1),TW,HRB,NAVY);
-
-  // Libellés des groupes (ligne 0)
-  [{c:[0],l:T.pdfGrpGroupe},{c:[1],l:T.pdfGrpPartie},{c:[2,3],l:T.pdfGrpCana},{c:[4,5],l:T.pdfGrpCoupe},{c:[6,7,8,9,10,11],l:T.pdfGrpMes},{c:[12,13,14],l:T.pdfGrpDdr},{c:[15,16],l:T.pdfGrpMes},{c:[17],l:T.pdfGrpCollab}].forEach(g=>{
-    const x=colX(g.c[0]),w=g.c.reduce((a,c)=>a+CW[c],0);TxtC(g.l,x,w,rowY(0)+1.8*MM,5.5,fB,WHITE);
-  });
-
-  // En-têtes de colonnes (ligne 1)
-  T.pdfColHdr.forEach((hdr,ci)=>{
-    const x=colX(ci),w=CW[ci],lns=hdr.split('\n'),lH=2.7*MM;
-    const totH=lns.length*lH,startY=rowY(1)+(HRB-totH)/2+(lns.length-1)*lH;
-    lns.forEach((ln,li)=>TxtC(ln,x,w,startY-li*lH,5,fB,WHITE));
-  });
-
-  // Séparateurs verticaux (18 colonnes → 19 traits)
-  for(let ci=0;ci<=18;ci++){const x=ci<18?colX(ci):ML+TW;L(x,TBOT,x,TTOP,MGRAY,.3);}
-  L(ML,TTOP,ML+TW,TTOP,NAVY,.7);L(ML,rowY(0),ML+TW,rowY(0),NAVY,.5);L(ML,rowY(1),ML+TW,rowY(1),MGRAY,.5);
-  for(let ri=2;ri<=2+NRD;ri++)L(ML,rowY(ri),ML+TW,rowY(ri),MGRAY,.25);
-  SR(ML,TBOT,TW,TH,NAVY,.7);
-
-  // Données des circuits
-  circuits.forEach((circ,ri)=>{
-    const ry=rowY(ri+2),ytxt=ry+HRD*.35;
-    const cols=[ri<D.circuits.length?String(ri+1):'',circ.desig||'',circ.ctype||'',circ.csect||'',circ.courbe||'',circ.inom||'',circ.icc_max_lpe||'',circ.icc_min_lpe||'',circ.icc_max_ln||'',circ.icc_min_ln||'',circ.riso||'',circ.rlo||'',circ.ddr_inom||'',circ.ddr_idelta||'',circ.ddr_temps||'',circ.champ||'',circ.chute||''];
+  // Données
+  for(let i=0;i<circuits.length;i++){
+    const circ=circuits[i];
+    const ry=dataRowY(i), ytxt=ry+HRD*0.28;
+    const cols=[circ.groupe||'',circ.desig||'',circ.ctype||'',circ.csect||'',circ.courbe||'',circ.inom||'',circ.icc_max_lpe||'',circ.icc_min_lpe||'',circ.icc_max_ln||'',circ.icc_min_ln||'',circ.riso||'',circ.rlo||'',circ.ddr_inom||'',circ.ddr_idelta||'',circ.ddr_temps||'',circ.champ||'',circ.chute||'',circ.rem||''];
     cols.forEach((val,ci)=>{
       const x=colX(ci),w=CW[ci];let col=BLACK,f=fR,sz=5.8;
       if(val==='OK'){col=GREEN;f=fB;}if(val==='NOK'){col=REDD;f=fB;}
       const s=clip(val,w-2,sz,f);
-      ci===1?Txt(s,x+1.5,ytxt,sz,f,col):TxtC(s,x,w,ytxt,sz,f,col);
+      (ci===1||ci===17)?Txt(s,x+1.5,ytxt,sz,f,col):TxtC(s,x,w,ytxt,sz,f,col);
     });
-    // Colonne 17 — Collaborateur : Nom Prénom (repris de l'installateur) + ligne de signature
-    if(ri<D.circuits.length){
-      const cx=colX(17),cw=CW[17],pad=2;
-      const nameStr=clip(D.nom_prenom||'',cw-pad*2,4.8,fR);
-      Txt(nameStr,cx+pad,ry+HRD*.68,4.8,fR,BLACK);
-      L(cx+pad,ry+HRD*.28,cx+cw-pad,ry+HRD*.28,MGRAY,.5);
+    // Col 18 — Collaborateur
+    if(i<D.circuits.length){
+      const cx=colX(18),cw=CW[18],pad=2;
+      const collabNom=circ.collab_nom||'';
+      const collabSig=circ.collab_sig||'';
+      Txt(clip(collabNom,cw-pad*2,4.8,fR),cx+pad,ry+HRD*.72,4.8,fR,BLACK);
+      if(collabSig){
+        try{
+          const sb=Uint8Array.from(atob(collabSig.split(',')[1]),c=>c.charCodeAt(0));
+          const si=await doc.embedPng(sb);
+          const maxW=cw-pad*2, maxH=HRD*0.52;
+          const ratio=si.width/si.height;
+          let dw=maxW, dh=dw/ratio;
+          if(dh>maxH){dh=maxH;dw=dh*ratio;}
+          page.drawImage(si,{x:cx+(cw-dw)/2,y:ry+HRD*.10,width:dw,height:dh});
+        }catch(e){console.warn('Sig collab circuit:',e);}
+      }
     }
+  }
+
+  // Grille
+  for(let ci=1;ci<19;ci++){const x=colX(ci);L(x,TBOT,x,headerBY,MGRAY,.3);}
+  for(let i=0;i<NRD;i++)L(ML,dataRowY(i),ML+TW,dataRowY(i),MGRAY,.25);
+
+  // En-têtes rowA
+  const grpDefs=[
+    {c:[0,1],col:NAVY},{c:[2,3],col:NAVY},{c:[4,5],col:NAVY},
+    {c:[6,7,8,9,10,11],col:NAVY},{c:[12,13,14],col:NAVY},{c:[15,16],col:NAVY},{c:[17],col:NAVY},{c:[18],col:NAVY}
+  ];
+  grpDefs.forEach(g=>{
+    const x=colX(g.c[0]),w=g.c.reduce((a,c)=>a+CW[c],0);
+    R(x,headerAY,w,HRA,g.col);
   });
 
-  // 4. ZONE BASSE — 3 blocs : Vérifications visuelles | Paramètres & Remarques | Installateur
+  // rowB
+  const colGrpColor=Array(19).fill(NAVY);
+  for(let ci=0;ci<19;ci++){
+    const x=colX(ci),w=CW[ci];
+    R(x,headerBY,w,HRB,colGrpColor[ci]);
+  }
+
+  // Séparateurs
+  const grpBoundaries=[1,2,4,6,12,15,17,18];
+  for(let ci=1;ci<=19;ci++){
+    const x=ci<19?colX(ci):ML+TW;
+    if(grpBoundaries.includes(ci)){
+      L(x,headerBY,x,headerAY+HRA,WHITE,1.0);
+    } else {
+      L(x,headerBY,x,headerBY+HRB,WHITE,.35);
+    }
+  }
+
+  // Textes rowA
+  [{c:[0],l:T.pdfGrpGroupe},{c:[1],l:T.pdfGrpPartie},{c:[2,3],l:T.pdfGrpCana},{c:[4,5],l:T.pdfGrpCoupe},{c:[6,7,8,9,10,11],l:T.pdfGrpMes},{c:[12,13,14],l:T.pdfGrpDdr},{c:[15,16],l:T.pdfGrpMes},{c:[17],l:'Rem.'},{c:[18],l:T.pdfGrpCollab}].forEach(g=>{
+    const x=colX(g.c[0]),w=g.c.reduce((a,c)=>a+CW[c],0);
+    TxtC(g.l,x,w,headerAY+1.8*MM,5.5,fB,WHITE);
+  });
+
+  // Textes rowB
+  T.pdfColHdr.forEach((hdr,ci)=>{
+    const x=colX(ci),w=CW[ci],lns=hdr.split('\n'),lH=2.7*MM;
+    const totH=lns.length*lH,startY=headerBY+(HRB-totH)/2+(lns.length-1)*lH;
+    lns.forEach((ln,li)=>TxtC(ln,x,w,startY-li*lH,5,fB,WHITE));
+  });
+
+  L(ML,TTOP,ML+TW,TTOP,NAVY,.7);
+  L(ML,headerAY,ML+TW,headerAY,NAVY,.5);
+  L(ML,headerBY,ML+TW,headerBY,NAVY,.5);
+  SR(ML,TBOT,TW,TH,NAVY,.7);
+
+  // 4. ZONE BASSE
   const BY=6*MM,BH=BZH-2*MM,TW3=TW,GAP=1.5*MM;
   const C1W=TW3*.37,C2W=TW3*.37,C3W=TW3-C1W-C2W-2*GAP;
   const X1=ML,X2=X1+C1W+GAP,X3=X2+C2W+GAP;
   const colBox=(x,w,title)=>{R(x,BY,w,BH,WHITE);SR(x,BY,w,BH,MGRAY,.5);R(x,BY+BH-5.5*MM,w,5.5*MM,NAVY);Txt(title,x+2*MM,BY+BH-3.8*MM,6,fB,WHITE);};
 
-  // Bloc 1 : Vérifications visuelles
   colBox(X1,C1W,T.pdfVerifTitle);
   TxtR(T.pdfEtat,X1+C1W-2*MM,BY+BH-3.8*MM,6,fB,WHITE);
   const vcRH=(BH-5.5*MM)/T.pdfVcLabels.length;
@@ -166,36 +224,58 @@ async function buildPDF(){
     TxtR(ok?'OK':'NOK',X1+C1W-2*MM,vy+vcRH*.35,6,fB,ok?GREEN:REDD);
   });
 
-  // Bloc 2 : Paramètres de mesure & Remarques
   colBox(X2,C2W,T.pdfParamsTitle);
   const params=[[T.pdfFacteur,(D.facteur_icc||'NON')+"  val: "+(D.valeur_facteur||'1')],[T.pdfTension,D.tension||'240V'],[T.pdfInstrument,D.instrument||'Metrel'],[T.pdfInventaire,D.num_inventaire||'']];
   const lh=5.5*MM;
   params.forEach(([k,v],i)=>{const py=BY+BH-5.5*MM-(i+1)*lh;if(i%2===0)R(X2,py,C2W,lh,LGRAY);Txt(k,X2+2*MM,py+lh*.35,5.3,fB,DGRAY);Txt(clip(v,C2W*.45,5.3,fR),X2+C2W*.52,py+lh*.35,5.3,fR,BLACK);});
   const remTop=BY+BH-5.5*MM-params.length*lh-2*MM;
   Txt(T.pdfRem,X2+2*MM,remTop-2.5*MM,5.8,fB,NAVY);
-  const rem=D.remarques||'';
-  if(rem){const mxW=C2W-6*MM;let words=rem.split(' '),cur='',lines=[];words.forEach(w=>{const t=cur?cur+' '+w:w;if(fR.widthOfTextAtSize(t,5.3)>mxW){if(cur)lines.push(cur);cur=w;}else cur=t;});if(cur)lines.push(cur);lines.slice(0,5).forEach((ln,i)=>Txt(ln,X2+2*MM,remTop-7*MM-i*3.8*MM,5.3,fR,BLACK));}
+  const remRaw=(D.remarques||'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  if(remRaw){const mxW=C2W-6*MM;let lines=[];remRaw.split('\n').forEach(para=>{let words=san(para).split(' '),cur='';words.forEach(w=>{const t=cur?cur+' '+w:w;if(fR.widthOfTextAtSize(t,5.3)>mxW){if(cur)lines.push(cur);cur=w;}else cur=t;});if(cur)lines.push(cur);});lines.slice(0,5).forEach((ln,i)=>Txt(ln,X2+2*MM,remTop-7*MM-i*3.8*MM,5.3,fR,BLACK));}
 
-  // Bloc 3 : Installateur électricien
   colBox(X3,C3W,T.pdfInstTitle);
-  [[T.pdfNomPrenom,D.nom_prenom||''],[T.pdfLieuDate,(D.lieu||'')+'   '+(D.date_sig||'')]].forEach(([k,v],i)=>{
+  const fmtDate=d=>{if(!d)return'';const p=d.split('-');return p.length===3?p[2]+'.'+p[1]+'.'+p[0]:d;};
+  [[T.pdfNomPrenom,D.nom_prenom||''],[T.pdfLieuDate,(D.lieu||'')+'   '+fmtDate(D.date_sig)]].forEach(([k,v],i)=>{
     const iy=BY+BH-5.5*MM-(i+1)*9*MM;if(i%2===0)R(X3,iy,C3W,9*MM,LGRAY);
     Txt(k,X3+2*MM,iy+5.5*MM,5.8,fB,DGRAY);Txt(clip(v,C3W-4*MM,6,fR),X3+2*MM,iy+2*MM,6,fR,BLACK);
   });
-  const sigY=BY+BH-5.5*MM-2*9*MM-8*MM;
+  const sigY=BY+BH-5.5*MM-2*9*MM-8*MM-2*MM-18*MM;
   Txt(T.pdfSignature,X3+2*MM,sigY+4*MM,5.8,fB,DGRAY);
-  L(X3+18*MM,sigY+4*MM,X3+C3W-4*MM,sigY+4*MM,MGRAY,.6);
-
-  // 5. FOOTER
-  R(0,0,W,5*MM,LGRAY);
-  Txt("C2 - Internal",ML,1.5*MM,5,fR,DGRAY);
-  TxtC(T.pdfFooter,0,W,1.5*MM,5,fR,DGRAY);
+  if(sigData){
+    try{
+      const sigBytes=Uint8Array.from(atob(sigData.split(',')[1]),c=>c.charCodeAt(0));
+      const sigImg=await doc.embedPng(sigBytes);
+      const maxSigW = C3W - 2*MM;
+      const maxSigH = BH - 5.5*MM - 2*9*MM - 2*MM;
+      const ratioImg = sigImg.width / sigImg.height;
+      let drawW = maxSigW;
+      let drawH = drawW / ratioImg;
+      if(drawH > maxSigH){ drawH = maxSigH; drawW = drawH * ratioImg; }
+      const sigX = X3 + (C3W - drawW) / 2;
+      const sigBottom = BY + 1*MM;
+      page.drawImage(sigImg,{x:sigX, y:sigBottom, width:drawW, height:drawH});
+    }catch(e){ console.warn('Signature PDF error:',e); }
+  } else {
+    L(X3+18*MM,sigY+4*MM,X3+C3W-4*MM,sigY+4*MM,MGRAY,.6);
+  }
 
   const bytes=await doc.save();
   const blob=new Blob([bytes],{type:'application/pdf'});
-  const url=URL.createObjectURL(blob);
   const fname='Protocole_'+(D.num_tableau||'T00').replace(/\s/g,'_')+'_'+(D.date_sig||new Date().toISOString().slice(0,10))+'.pdf';
-  const a=document.createElement('a');a.href=url;a.download=fname;a.target='_blank';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url),3000);
+  return {blob,filename:fname};
+}
+
+async function generatePDF(){
+  saveData();
+  const btn=document.getElementById('pdfBtn');
+  btn.disabled=true;document.getElementById('btn-pdf-lbl').textContent=I18N[currentLang].pdfLoading||'⏳ Génération...';
+  try{
+    const {blob,filename}=await buildPDFBlob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=filename;a.target='_blank';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),3000);
+    showToast(I18N[currentLang].pdfOk||'PDF généré ✓');
+  }catch(e){console.error(e);showToast('Erreur: '+e.message,4000);}
+  finally{btn.disabled=false;document.getElementById('btn-pdf-lbl').textContent=I18N[currentLang].btnPdf||'Générer PDF';}
 }
