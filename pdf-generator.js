@@ -17,14 +17,36 @@ async function buildPDF(){
   const fB=await doc.embedFont(StandardFonts.HelveticaBold);
   const fR=await doc.embedFont(StandardFonts.Helvetica);
 
-  // Logo SBB CFF FFS (JPEG en base64, défini dans logo.js)
+  // Logo SBB CFF FFS (défini dans logo.js) : PNG sans perte en priorité, JPEG en secours.
+  // Les données sont vérifiées avant intégration ; un logo abîmé est ignoré (texte à la place).
   let logoImg=null;
-  try{
-    if(typeof LOGO_B64==='string'&&LOGO_B64){
-      const b64=LOGO_B64.replace(/^data:image\/[a-z]+;base64,/i,'');
-      logoImg=await doc.embedJpg(Uint8Array.from(atob(b64),c=>c.charCodeAt(0)));
+  const b64Bytes=v=>Uint8Array.from(atob(String(v).replace(/^data:[^,]*,/,'').replace(/\s+/g,'')),c=>c.charCodeAt(0));
+  const u32=(u,p)=>((u[p]<<24)|(u[p+1]<<16)|(u[p+2]<<8)|u[p+3])>>>0;
+  // PNG : signature + somme de contrôle (CRC) de chaque bloc jusqu'à IEND
+  const pngOk=u=>{
+    if(![0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A].every((x,i)=>u[i]===x))return false;
+    let p=8;
+    while(p+12<=u.length){
+      const end=p+12+u32(u,p);if(end>u.length)return false;
+      let c=0xFFFFFFFF;
+      for(let i=p+4;i<end-4;i++){c^=u[i];for(let k=0;k<8;k++)c=(c>>>1)^(0xEDB88320&-(c&1));}
+      if(((c^0xFFFFFFFF)>>>0)!==u32(u,end-4))return false;
+      if(u32(u,p+4)===0x49454E44)return end===u.length; // bloc IEND = fin du fichier
+      p=end;
     }
-  }catch(e){console.warn('Logo non intégré au PDF :',e);}
+    return false;
+  };
+  // JPEG : marqueurs de début (FFD8) et de fin (FFD9) présents
+  const jpgOk=u=>u.length>4&&u[0]===0xFF&&u[1]===0xD8&&u[u.length-2]===0xFF&&u[u.length-1]===0xD9;
+  const logoSources=[
+    {b64:typeof LOGO_PNG_B64==='string'?LOGO_PNG_B64:'',ok:pngOk,embed:u=>doc.embedPng(u)},
+    {b64:typeof LOGO_B64==='string'?LOGO_B64:'',ok:jpgOk,embed:u=>doc.embedJpg(u)}
+  ];
+  for(const src of logoSources){
+    if(logoImg||!src.b64)continue;
+    try{const u=b64Bytes(src.b64);if(src.ok(u))logoImg=await src.embed(u);else console.warn('Logo ignoré : données invalides');}
+    catch(e){console.warn('Logo non intégré au PDF :',e);}
+  }
 
   const NAVY=rgb(.102,.180,.369),NAVY2=rgb(.141,.220,.439),NAVY3=rgb(.176,.259,.502);
   const WHITE=rgb(1,1,1);
