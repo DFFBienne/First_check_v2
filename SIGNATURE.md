@@ -1,4 +1,4 @@
-# Profil et signature électronique — V1.2.3
+# Profil et signature électronique — V1.2.4
 
 ## Ce qui change pour l'utilisateur
 
@@ -63,6 +63,16 @@ Ce qui est signé est verrouillé 🔒. Plusieurs personnes : exporter le JSON �
 Le dernier signataire peut retirer sa propre signature pour corriger.
 
 **PDF** : page 1 avec les signatures (« SIGNATURE INVALIDE » si les données ont été modifiées), page 2 « Signatures électroniques » (détail et statut), JSON signé joint au PDF.
+
+## PDF scellé (non modifiable sans trace)
+
+Quand la personne qui génère le PDF est connectée et autorisée, le PDF reçoit une **signature numérique PDF** (certification « aucune modification autorisée »). Si le protocole contient des signatures et que personne n'est connecté, la connexion est proposée ; en cas d'annulation, le PDF sort **non scellé** (message d'avertissement).
+
+Dans PDF-XChange ou Acrobat, panneau **Signatures** :
+- PDF intact → signature valide, signataire = la personne qui a généré le PDF ;
+- toute modification (texte, annotation, page, même enregistrée par PDF-XChange) → signature **invalide** / « document modifié depuis la certification ».
+
+Le lecteur indique « identité inconnue » (certificat auto-signé, pas d'autorité reconnue) : c'est normal, l'intégrité est vérifiée quand même. Aucun format PDF ne peut empêcher techniquement un logiciel de réécrire le fichier ; le sceau rend la modification **visible**.
 
 ## Limites
 

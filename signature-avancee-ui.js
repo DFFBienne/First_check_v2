@@ -40,6 +40,7 @@
       signed: 'Signé ✓', removeLast: 'Retirer ma dernière signature', confirmRemove: 'Retirer votre signature ? Les champs concernés seront déverrouillés.',
       allOk: 'Toutes les signatures sont valides', problem: 'Problème détecté sur une ou plusieurs signatures',
       common: 'bas de page', circ: 'ligne(s)', locked: '🔒 Verrouillé par signature', importWarn: 'Signatures du fichier vérifiées',
+      sealed: 'PDF scellé ✓ — toute modification sera signalée par le lecteur PDF', notSealed: 'PDF NON scellé (non connecté ou compte non validé) : il reste modifiable sans trace.', sealError: 'Scellement du PDF impossible',
     },
     de: {
       title: 'Elektronische Unterschriften', none: 'Keine elektronische Unterschrift.',
@@ -55,6 +56,7 @@
       signed: 'Unterschrieben ✓', removeLast: 'Meine letzte Unterschrift entfernen', confirmRemove: 'Unterschrift entfernen? Die Felder werden entsperrt.',
       allOk: 'Alle Unterschriften sind gültig', problem: 'Problem bei einer oder mehreren Unterschriften',
       common: 'unten', circ: 'Zeile(n)', locked: '🔒 Durch Unterschrift gesperrt', importWarn: 'Unterschriften der Datei geprüft',
+      sealed: 'PDF versiegelt ✓ — jede Änderung wird vom PDF-Reader angezeigt', notSealed: 'PDF NICHT versiegelt (nicht angemeldet oder Konto nicht freigegeben): es bleibt spurlos änderbar.', sealError: 'PDF-Versiegelung fehlgeschlagen',
     },
     it: {
       title: 'Firme elettroniche', none: 'Nessuna firma elettronica.',
@@ -70,6 +72,7 @@
       signed: 'Firmato ✓', removeLast: 'Rimuovere la mia ultima firma', confirmRemove: 'Rimuovere la firma? I campi saranno sbloccati.',
       allOk: 'Tutte le firme sono valide', problem: 'Problema su una o più firme',
       common: 'in basso', circ: 'riga/e', locked: '🔒 Bloccato da firma', importWarn: 'Firme del file verificate',
+      sealed: 'PDF sigillato ✓ — ogni modifica sarà segnalata dal lettore PDF', notSealed: 'PDF NON sigillato (non connesso o account non convalidato): resta modificabile senza traccia.', sealError: 'Sigillatura del PDF impossibile',
     },
   };
   const STATUS_TXT = {
@@ -318,12 +321,12 @@
   /* ------------------------------------------------------------- 9. PDF */
   const ascii = s => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\x20-\x7E]/g, '?');
   const PDF_TXT = {
-    fr: { ok: 'Toutes les signatures sont valides au moment de la generation de ce PDF.', ko: 'ATTENTION : une ou plusieurs signatures ne sont pas valides !', signedOn: 'Signe le', scope: 'Perimetre', commonL: 'donnees communes (bas de page)', lines: 'lignes', status: 'Statut', foot1: 'Signature electronique avancee (ECDSA P-256). Le fichier JSON signe est joint a ce PDF ; pour verifier, l\'importer dans l\'application.', foot2: 'Toute modification des donnees apres signature est detectee lors de la verification.' },
-    de: { ok: 'Alle Unterschriften sind zum Zeitpunkt der PDF-Erstellung gueltig.', ko: 'ACHTUNG: eine oder mehrere Unterschriften sind ungueltig!', signedOn: 'Unterschrieben am', scope: 'Umfang', commonL: 'gemeinsame Daten (unten)', lines: 'Zeilen', status: 'Status', foot1: 'Fortgeschrittene elektronische Unterschrift (ECDSA P-256). Die signierte JSON-Datei ist angehaengt; zur Pruefung in die App importieren.', foot2: 'Jede Aenderung der Daten nach der Unterschrift wird bei der Pruefung erkannt.' },
-    it: { ok: 'Tutte le firme sono valide al momento della generazione di questo PDF.', ko: 'ATTENZIONE: una o piu firme non sono valide!', signedOn: 'Firmato il', scope: 'Perimetro', commonL: 'dati comuni (in basso)', lines: 'righe', status: 'Stato', foot1: 'Firma elettronica avanzata (ECDSA P-256). Il file JSON firmato e allegato; per verificarlo, importarlo nell\'applicazione.', foot2: 'Ogni modifica dei dati dopo la firma viene rilevata alla verifica.' },
+    fr: { ok: 'Toutes les signatures sont valides au moment de la generation de ce PDF.', ko: 'ATTENTION : une ou plusieurs signatures ne sont pas valides !', signedOn: 'Signe le', scope: 'Perimetre', commonL: 'donnees communes (bas de page)', lines: 'lignes', status: 'Statut', foot1: 'Signature electronique avancee (ECDSA P-256). Le fichier JSON signe est joint a ce PDF ; pour verifier, l\'importer dans l\'application.', sealedBy: 'PDF scelle (signature numerique PDF) par', foot3: 'toute modification de ce fichier est signalee par le lecteur PDF (panneau Signatures).', foot2: 'Toute modification des donnees apres signature est detectee lors de la verification.' },
+    de: { ok: 'Alle Unterschriften sind zum Zeitpunkt der PDF-Erstellung gueltig.', ko: 'ACHTUNG: eine oder mehrere Unterschriften sind ungueltig!', signedOn: 'Unterschrieben am', scope: 'Umfang', commonL: 'gemeinsame Daten (unten)', lines: 'Zeilen', status: 'Status', foot1: 'Fortgeschrittene elektronische Unterschrift (ECDSA P-256). Die signierte JSON-Datei ist angehaengt; zur Pruefung in die App importieren.', sealedBy: 'PDF versiegelt (digitale PDF-Signatur) durch', foot3: 'jede Aenderung dieser Datei wird vom PDF-Reader angezeigt (Bereich Unterschriften).', foot2: 'Jede Aenderung der Daten nach der Unterschrift wird bei der Pruefung erkannt.' },
+    it: { ok: 'Tutte le firme sono valide al momento della generazione di questo PDF.', ko: 'ATTENZIONE: una o piu firme non sono valide!', signedOn: 'Firmato il', scope: 'Perimetro', commonL: 'dati comuni (in basso)', lines: 'righe', status: 'Stato', foot1: 'Firma elettronica avanzata (ECDSA P-256). Il file JSON firmato e allegato; per verificarlo, importarlo nell\'applicazione.', sealedBy: 'PDF sigillato (firma digitale PDF) da', foot3: 'ogni modifica di questo file viene segnalata dal lettore PDF (pannello Firme).', foot2: 'Ogni modifica dei dati dopo la firma viene rilevata alla verifica.' },
   };
 
-  async function addSignaturePage(blob) {
+  async function addSignaturePage(blob, sealer) {
     if (!signatures.length || !window.PDFLib) return blob;
     const P = PDF_TXT[currentLang] || PDF_TXT.fr;
     const { PDFDocument, rgb, StandardFonts } = PDFLib;
@@ -369,6 +372,7 @@
       txt('ID : ' + S.signerId + '   SHA-256 : ' + S.dataHash, X, y - 16.5 * MM, 6, fR, GRAY);
       y -= rowH;
     }
+    if (sealer) txt(P.sealedBy + ' ' + sealer.name + (sealer.email ? ' (' + sealer.email + ')' : '') + ' - ' + P.foot3, ML, 16 * MM, 7, fB, NAVY);
     txt(P.foot1, ML, 12 * MM, 7, fR, GRAY);
     txt(P.foot2, ML, 8 * MM, 7, fR, GRAY);
 
@@ -377,12 +381,33 @@
     return new Blob([await doc.save()], { type: 'application/pdf' });
   }
 
+  // Qui scelle le PDF : l'utilisateur connecté et autorisé. Si le protocole
+  // contient des signatures et que personne n'est connecté, la connexion est proposée.
+  async function resolveSealer() {
+    let s = await SA.getSession();
+    if (!s && signatures.length && window.Profil) s = await Profil.login();
+    if (!s || !s.code) return null;
+    if (await SA.accountStatus(s.id) !== 'authorized') return null;
+    const entry = await SA.parseCode(s.code);
+    return { privateKey: s.privateKey, publicJwk: entry.publicJwk, name: s.name, email: s.email };
+  }
+
   if (typeof window.buildPDFBlob === 'function') {
     const _buildPDFBlob = window.buildPDFBlob;
     window.buildPDFBlob = async function () {
       await verifyNow(); // statut à jour pour la page 1 (images sur les lignes / bas de page)
+      const sealer = await resolveSealer();
       const res = await _buildPDFBlob.apply(this, arguments);
-      try { res.blob = await addSignaturePage(res.blob); } catch (e) { console.error('Page signatures :', e); }
+      try { res.blob = await addSignaturePage(res.blob, sealer); } catch (e) { console.error('Page signatures :', e); }
+      if (sealer && window.PdfScellement) {
+        try {
+          const data = collectAll();
+          const sealedBytes = await PdfScellement.seal(new Uint8Array(await res.blob.arrayBuffer()), sealer,
+            { reason: 'Protocole premieres verifications ' + (data.num_tableau || ''), location: data.lieu || '' });
+          res.blob = new Blob([sealedBytes], { type: 'application/pdf' });
+          setTimeout(() => showToast(t('sealed'), 3500), 2500);
+        } catch (e) { console.error('Scellement :', e); setTimeout(() => showToast(t('sealError') + ' : ' + e.message, 5000), 2500); }
+      } else setTimeout(() => showToast(t('notSealed'), 5000), 2500);
       return res;
     };
   }

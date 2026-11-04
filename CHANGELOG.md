@@ -1,6 +1,14 @@
 # Changelog — Protocole Premières Vérifications SBB CFF FFS
 
 ---
+## V1.2.4 — 2026-11-04
+
+### Ajouté
+- **PDF scellé** (`pdf-scellement.js`) : signature numérique PDF (adbe.pkcs7.detached, ECDSA P-256 / SHA-256) avec la clé de la personne connectée, en mode certification « aucune modification autorisée ». Toute modification ultérieure du PDF (par ex. dans PDF-XChange) est signalée comme invalide par le lecteur PDF. Mention du scellement en page « Signatures électroniques ».
+- Connexion proposée à la génération du PDF si le protocole contient des signatures ; avertissement si le PDF sort non scellé.
+
+---
+
 ## V1.2.3 — 2026-11-04
 
 ### Ajouté
