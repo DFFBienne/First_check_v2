@@ -6,13 +6,13 @@
  *    la clé privée est chiffrée avec le mot de passe de l'utilisateur
  *    (PBKDF2-SHA256 600 000 itérations + AES-256-GCM) ;
  *  - le résultat est un « code d'inscription » (texte SBB1.…) envoyé par e-mail
- *    au responsable, qui le colle dans utilisateurs.js ;
+ *    au responsable, qui le colle dans utilisateurs.txt ;
  *  - sur n'importe quel appareil, nom + mot de passe déchiffrent la clé.
  *    Sans le mot de passe, personne (ni le responsable) ne peut signer.
  * Signatures :
  *  - chaque signature couvre un périmètre (données communes et/ou circuits) via
  *    une empreinte SHA-256 ; toute modification ultérieure est détectée ;
- *  - seules les clés présentes dans utilisateurs.js sont acceptées.
+ *  - seules les clés présentes dans utilisateurs.txt sont acceptées.
  * 100 % hors-ligne, aucune dépendance.
  * ========================================================================== */
 (function (global) {
@@ -24,6 +24,7 @@
     excludedKeys: ['signatures', 'sigData', 'lang', '_version', '_app', 'circuits'],
     circuitKey: 'uid',            // identifiant stable d'un circuit
     codePrefix: 'SBB1.',
+    registryUrl: 'utilisateurs.txt', // liste des personnes autorisées (texte simple)
     pbkdf2Iterations: 600000,
     minPasswordLength: 12,
     db: { name: 'sbb-signature', store: 'keys', version: 1 },
@@ -116,7 +117,8 @@
   async function parseCode(code, revoque) {
     const s = String(code || '').replace(/\s+/g, '');
     if (!s.startsWith(CONFIG.codePrefix)) throw new Error('BAD_CODE');
-    const b = JSON.parse(dec.decode(unb64url(s.slice(CONFIG.codePrefix.length))));
+    let b;
+    try { b = JSON.parse(dec.decode(unb64url(s.slice(CONFIG.codePrefix.length)))); } catch (e) { throw new Error('BAD_CODE'); }
     if (b.v !== 1 || !b.x || !b.y || !b.k) throw new Error('BAD_CODE');
     const publicJwk = { kty: 'EC', crv: 'P-256', x: b.x, y: b.y };
     return {
@@ -140,21 +142,51 @@
   }
 
   /* ---------------------------------------------------------------- REGISTRE */
-  // utilisateurs.js : window.UTILISATEURS = [ `SBB1.…`, { code: `SBB1.…`, revoque: '2026-12-31' }, … ]
-  let _registry = null;
+  // utilisateurs.txt : texte libre, tolérant aux erreurs de copie.
+  //   - une ligne commençant par SBB1. démarre un code, les lignes suivantes
+  //     composées uniquement de caractères base64 le prolongent ;
+  //   - # ou // = commentaire ; accents graves, virgules, guillemets ignorés ;
+  //   - « REVOQUE 2026-12-31 » sous un code le révoque à cette date.
+  function parseRegistryText(txt) {
+    const items = []; let cur = null;
+    const flush = () => { if (cur) { items.push(cur); cur = null; } };
+    for (const raw of String(txt || '').split(/\r?\n/)) {
+      const line = raw.trim();
+      const part = line.replace(/(\/\/|#).*$/, '').replace(/[`'",;{}\[\]]/g, ' ').replace(/^\s*code\s*:/i, '').trim();
+      const rev = line.match(/r[ée]voqu[ée]?\s*:?\s*(\d{4}-\d{2}-\d{2})/i);
+      if (/^SBB1\./.test(part)) { flush(); cur = { code: part.split(/\s+/)[0], revoque: null }; }
+      else if (cur && /^[A-Za-z0-9_-]+$/.test(part)) cur.code += part;
+      else if (part && !rev) flush();
+      if (rev) { const target = cur || items[items.length - 1]; if (target) target.revoque = rev[1]; }
+    }
+    flush();
+    return items;
+  }
+
+  let _registry = null, _registryInfo = { loaded: false, codes: 0, errors: 0 };
   async function loadRegistry(force) {
     if (_registry && !force) return _registry;
-    const out = [], seen = new Set();
-    for (const item of (global.UTILISATEURS || [])) {
+    let items = [], loaded = false;
+    if (Array.isArray(global.UTILISATEURS)) { items = items.concat(global.UTILISATEURS); loaded = true; } // ancien format / tests
+    if (CONFIG.registryUrl && typeof fetch === 'function' && global.location && /^https?:/.test(global.location.protocol)) {
+      try {
+        const r = await fetch(CONFIG.registryUrl, { cache: 'no-cache' });
+        if (r.ok) { items = items.concat(parseRegistryText(await r.text())); loaded = true; }
+      } catch (e) { console.warn('utilisateurs.txt inaccessible', e); }
+    }
+    const out = [], seen = new Set(); let errors = 0;
+    for (const item of items) {
       try {
         const code = typeof item === 'string' ? item : item && item.code;
         const e = await parseCode(code, item && item.revoque);
         if (!seen.has(e.id)) { seen.add(e.id); out.push(e); }
-      } catch (err) { console.warn('utilisateurs.js : code illisible ignoré', err); }
+      } catch (err) { errors++; console.warn('utilisateurs.txt : code illisible ignoré', err); }
     }
     out.sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+    _registryInfo = { loaded, codes: out.length, errors };
     return (_registry = out);
   }
+  const registryInfo = () => _registryInfo;
   async function findUser(id) { return (await loadRegistry()).find(u => u.id === id) || null; }
   // 'authorized' | 'pending' (absent du registre) | 'revoked'
   async function accountStatus(id) {
@@ -259,7 +291,7 @@
   }
 
   global.SignatureAvancee = {
-    CONFIG, createAccount, parseCode, unlock, loadRegistry, findUser, accountStatus,
+    CONFIG, createAccount, parseCode, unlock, loadRegistry, registryInfo, parseRegistryText, findUser, accountStatus,
     login, openSession, getSession, logout,
     sign, verify, lockedScope, unsignedCircuits, circuitId,
     _canonical: canonical, _sha256: sha256,

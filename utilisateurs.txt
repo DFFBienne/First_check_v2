@@ -1,0 +1,29 @@
+# ============================================================================
+# utilisateurs.txt — Personnes autorisées à signer électroniquement
+# ----------------------------------------------------------------------------
+# AJOUTER une personne : coller en bas de ce fichier le bloc reçu par e-mail
+#   (la ligne « # Nom – e-mail – date » puis les lignes qui commencent par SBB1.).
+#   Aucune syntaxe à respecter : lignes vides, espaces, accents graves ou
+#   virgules copiés par erreur sont ignorés.
+#   Vérifier que l'e-mail vient bien de l'adresse de la personne.
+#
+# RÉVOQUER une personne (départ, mot de passe compromis) : NE PAS supprimer
+#   son bloc, mais ajouter juste en dessous une ligne :
+#     REVOQUE 2026-12-31
+#   Ses signatures antérieures à cette date restent valides.
+#
+# Les lignes qui commencent par # sont des commentaires.
+# Après chaque modification : incrémenter CACHE_NAME dans sw.js.
+# ============================================================================
+
+# Pedroza Cédric – cedric.pedroza@gmail.com – 2026-11-04
+SBB1.eyJ2IjoxLCJub20iOiJQZWRyb3phIiwicHJlbm9tIjoiQ8OpZHJpYyIsImV
+tYWlsIjoiY2VkcmljLnBlZHJvemFAZ21haWwuY29tIiwiZCI6IjIwMjYtMTEtMDQ
+iLCJ4IjoiRWpubS1CWnBnaVlYT0pfdGN1QmY4dUVqWnFONXFlOUpRUi0wZ3Z0ekZ
+rayIsInkiOiJJWnJoZUJseHBjZ3RTRnZURFNtOEMyOU92M0Npay1lbmNaSGRxR0d
+zUlFVIiwicyI6InpQSFFYSDE4X01aUmZnRVVYbzJqMHciLCJpIjoialczWE5NT0p
+ERzJ1OWZ6ZCIsIml0Ijo2MDAwMDAsImsiOiJwN05KYjJ1Y2xUSGRUTVVhaWx5LTh
+Oa1MyTjhpZGItRUtBeE1rS2dNVVk4cG1JYnU4UzFqQXRDRzFBWDh1cFRPemFaM0g
+zUzFRZjZaaDB2NDluN01POXpTbDF5bzF0c0pBeEZTM0FzS0NtWDFsLUNDdnc2WEs
+zSVlMSHlha2JrbWpGcVFWSE44WUJhTnNNZTZOYWkyWlA1TWZDc0RrRS1CRWNBZVQ
+2RWpZZlNTa0FScE5tbE9pYUk5OU41NnRiM1hVUWNxVUNrdnJLZGpvZyJ9

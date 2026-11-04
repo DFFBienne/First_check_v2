@@ -1,4 +1,4 @@
-# Profil et signature électronique — V1.2.0
+# Profil et signature électronique — V1.2.2
 
 ## Ce qui change pour l'utilisateur
 
@@ -19,19 +19,21 @@ Le profil reste sur l'appareil. Un nouveau protocole est prérempli automatiquem
 
 1. Remplir le profil (nom, prénom, e-mail, signature).
 2. **Créer mon compte** → choisir un mot de passe (12 caractères minimum, ne peut pas être récupéré).
-3. L'application e-mail s'ouvre avec un message prêt pour **cedric.pedroza@sbb.ch** → **Envoyer**.
+3. Une fenêtre explique la marche à suivre et pourquoi, puis **Ouvrir l'e-mail** ouvre un message prêt pour **cedric.pedroza@sbb.ch** → **Envoyer**. (« Plus tard » : l'envoi reste possible depuis Mon profil → Renvoyer l'e-mail.)
 4. Statut « ⏳ En attente de validation » jusqu'à l'ajout par le responsable.
 
 ## Validation par le responsable
 
 1. Vérifier que l'e-mail vient bien de l'adresse de la personne.
-2. Copier le bloc entre les deux lignes de tirets, de `` `SBB1.`` jusqu'à la virgule (le commentaire `// Nom – e-mail – date` peut être copié avec).
-3. Le coller dans **`utilisateurs.js`**, sous `// ↓ Coller les nouveaux codes ici ↓`.
-4. Incrémenter `CACHE_NAME` dans `sw.js` (ex. `v1.2.1`), puis commit → GitHub Pages redéploie.
+2. Copier le bloc entre les deux lignes de tirets : la ligne `# Nom – e-mail – date` et les lignes qui commencent par `SBB1.`.
+3. Le coller **à la fin de `utilisateurs.txt`** (fichier texte simple : aucune syntaxe à respecter, les lignes vides, espaces, accents graves ou virgules copiés par erreur sont ignorés).
+4. Incrémenter `CACHE_NAME` dans `sw.js` (ex. `'sbb-protocole-v1.2.3'` — **garder les deux apostrophes**), puis commit → GitHub Pages redéploie.
 
-**Révoquer** quelqu'un : ne pas supprimer son bloc, l'entourer ainsi :
-```js
-  { code: `SBB1.…`, revoque: '2026-12-31' },
+Si un code est incomplet, la fenêtre de connexion l'indique (« utilisateurs.txt contient 1 code illisible »).
+
+**Révoquer** quelqu'un : ne pas supprimer son bloc, ajouter juste en dessous la ligne
+```
+REVOQUE 2026-12-31
 ```
 Ses signatures antérieures restent valides, les suivantes sont refusées.
 

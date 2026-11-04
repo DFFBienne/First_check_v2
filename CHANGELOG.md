@@ -1,6 +1,18 @@
 # Changelog — Protocole Premières Vérifications SBB CFF FFS
 
 ---
+## V1.2.2 — 2026-11-04
+
+### Modifié
+- **Registre des signataires** : `utilisateurs.js` remplacé par **`utilisateurs.txt`**, un fichier texte simple. Le bloc reçu par e-mail s'y colle tel quel ; une copie imparfaite (accent grave ou virgule manquants, espaces) ne bloque plus l'application. Révocation par une ligne `REVOQUE AAAA-MM-JJ`.
+- Fenêtre de connexion : message précis si la liste est inaccessible ou contient un code illisible.
+
+### Corrigé
+- « Aucun utilisateur validé » alors qu'un code avait été ajouté : le code collé sans accent grave rendait `utilisateurs.js` invalide.
+- `sw.js` : apostrophe manquante dans `CACHE_NAME` (service worker hors service).
+
+---
+
 ## V1.2.0 — 2026-11-04
 
 ### Ajouté
@@ -11,6 +23,7 @@
   - connexion sur n'importe quel appareil (nom + mot de passe), demandée uniquement pour signer ;
   - signature des données communes (bas de page) et/ou des circuits (colonne Collaborateur, ligne par ligne) ; verrouillage de ce qui est signé ; détection de toute modification ;
   - PDF : signatures sur la page 1, page « Signatures électroniques », JSON signé joint.
+- **Fenêtre explicative à l'inscription** : avant l'ouverture de l'e-mail, explique les 3 étapes (envoyer, validation par le responsable, signature possible après mise à jour), pourquoi la validation est nécessaire (OIBT) et que le mot de passe n'est jamais envoyé. Boutons « Ouvrir l'e-mail », « Plus tard » et copie du bloc si l'e-mail ne s'ouvre pas.
 - Nouveaux fichiers : `profil.js`, `signature-avancee.js`, `signature-avancee-ui.js`, `utilisateurs.js`, `SIGNATURE.md`.
 
 ### Corrigé

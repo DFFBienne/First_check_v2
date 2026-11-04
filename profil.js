@@ -41,6 +41,8 @@
       loginTitle: 'Connexion', user: 'Utilisateur', password: 'Mot de passe', password2: 'Confirmer le mot de passe',
       remember: 'Rester connecté sur cet appareil (à décocher sur un PC partagé)', badPassword: 'Mot de passe incorrect.',
       noUsers: 'Aucun utilisateur validé pour l’instant. Créez votre compte et attendez sa validation.',
+      noRegistry: 'Liste des utilisateurs inaccessible. Connectez-vous à Internet puis réessayez.',
+      badRegistry: 'utilisateurs.txt contient {n} code(s) illisible(s) : vérifiez que le bloc reçu par e-mail a été copié en entier.',
       regTitle: 'Créer mon compte de signature',
       regInfo: 'Choisissez un mot de passe d’au moins 12 caractères. Il protège votre signature : sans lui, personne (pas même le responsable) ne peut signer à votre nom. <b>Il ne peut pas être récupéré</b> en cas d’oubli.',
       regSend: 'Valider l’inscription', pwShort: 'Le mot de passe doit contenir au moins 12 caractères.', pwDiff: 'Les deux mots de passe sont différents.',
@@ -61,7 +63,7 @@
       wait: '⏳ Vérification…',
       subject: 'Inscription signature électronique – ',
       mailIntro: 'Bonjour,\n\nMerci d’ajouter mon compte de signature à l’application « Premières vérifications ».\n\n',
-      mailBlock: 'Bloc à copier dans utilisateurs.js :', mailEnd: '\nMeilleures salutations\n',
+      mailBlock: 'Bloc à copier dans utilisateurs.txt :', mailEnd: '\nMeilleures salutations\n',
     },
     de: {
       title: 'Mein Profil', back: '‹ Zurück', autosave: 'Automatisch auf diesem Gerät gespeichert',
@@ -78,6 +80,8 @@
       loginTitle: 'Anmeldung', user: 'Benutzer', password: 'Passwort', password2: 'Passwort bestätigen',
       remember: 'Auf diesem Gerät angemeldet bleiben (auf gemeinsamen PCs deaktivieren)', badPassword: 'Falsches Passwort.',
       noUsers: 'Noch kein Benutzer freigegeben. Konto erstellen und Freigabe abwarten.',
+      noRegistry: 'Benutzerliste nicht erreichbar. Mit dem Internet verbinden und erneut versuchen.',
+      badRegistry: 'utilisateurs.txt enthält {n} unlesbare(n) Code(s): prüfen, ob der Block aus der E-Mail vollständig kopiert wurde.',
       regTitle: 'Signaturkonto erstellen',
       regInfo: 'Wählen Sie ein Passwort mit mindestens 12 Zeichen. Es schützt Ihre Unterschrift: ohne es kann niemand (auch nicht der Verantwortliche) in Ihrem Namen unterschreiben. <b>Es kann nicht wiederhergestellt werden.</b>',
       regSend: 'Registrierung absenden', pwShort: 'Das Passwort muss mindestens 12 Zeichen haben.', pwDiff: 'Die Passwörter stimmen nicht überein.',
@@ -98,7 +102,7 @@
       wait: '⏳ Prüfung…',
       subject: 'Registrierung elektronische Unterschrift – ',
       mailIntro: 'Guten Tag\n\nBitte mein Signaturkonto in der App «Erstprüfungen» freigeben.\n\n',
-      mailBlock: 'Block zum Kopieren in utilisateurs.js:', mailEnd: '\nFreundliche Grüsse\n',
+      mailBlock: 'Block zum Kopieren in utilisateurs.txt:', mailEnd: '\nFreundliche Grüsse\n',
     },
     it: {
       title: 'Il mio profilo', back: '‹ Indietro', autosave: 'Salvataggio automatico su questo dispositivo',
@@ -115,6 +119,8 @@
       loginTitle: 'Accesso', user: 'Utente', password: 'Password', password2: 'Confermare la password',
       remember: 'Restare connesso su questo dispositivo (deselezionare su PC condivisi)', badPassword: 'Password errata.',
       noUsers: 'Nessun utente ancora convalidato. Creare l’account e attendere la convalida.',
+      noRegistry: 'Elenco utenti non raggiungibile. Connettersi a Internet e riprovare.',
+      badRegistry: 'utilisateurs.txt contiene {n} codice/i illeggibile/i: verificare che il blocco ricevuto per e-mail sia stato copiato per intero.',
       regTitle: 'Creare l’account di firma',
       regInfo: 'Scegliere una password di almeno 12 caratteri. Protegge la sua firma: senza di essa nessuno (nemmeno il responsabile) può firmare a suo nome. <b>Non può essere recuperata.</b>',
       regSend: 'Convalidare l’iscrizione', pwShort: 'La password deve contenere almeno 12 caratteri.', pwDiff: 'Le password non corrispondono.',
@@ -135,7 +141,7 @@
       wait: '⏳ Verifica…',
       subject: 'Iscrizione firma elettronica – ',
       mailIntro: 'Buongiorno,\n\nLa prego di aggiungere il mio account di firma all’applicazione «Prime verifiche».\n\n',
-      mailBlock: 'Blocco da copiare in utilisateurs.js:', mailEnd: '\nCordiali saluti\n',
+      mailBlock: 'Blocco da copiare in utilisateurs.txt:', mailEnd: '\nCordiali saluti\n',
     },
   };
   const t = k => (TXT[currentLang] || TXT.fr)[k];
@@ -289,8 +295,12 @@
   /* ------------------------------------------------------------- CONNEXION */
   // Ouvre la fenêtre de connexion ; résout la session ou null
   async function login() {
-    const reg = (await SA.loadRegistry()).filter(u => !u.validUntil);
-    if (!reg.length) { alert(t('noUsers')); return null; }
+    const reg = (await SA.loadRegistry(true)).filter(u => !u.validUntil);
+    if (!reg.length) {
+      const info = SA.registryInfo();
+      alert(!info.loaded ? t('noRegistry') : info.errors ? t('badRegistry').replace('{n}', info.errors) : t('noUsers'));
+      return null;
+    }
     const p = load();
     const pre = reg.find(u => p.email && u.email.toLowerCase() === p.email.toLowerCase()) || reg.find(u => u.name === fullName(p));
     return new Promise(resolve => {
@@ -393,10 +403,9 @@
       });
   }
 
-  // Bloc prêt à coller dans utilisateurs.js
+  // Bloc prêt à coller dans utilisateurs.txt
   function codeBlock(entry) {
-    const lines = entry.code.match(/.{1,64}/g);
-    return '  `' + lines.join('\n   ') + '`,  // ' + entry.name + ' – ' + entry.email + ' – ' + (entry.validFrom || '');
+    return '# ' + entry.name + ' – ' + entry.email + ' – ' + (entry.validFrom || '') + '\n' + entry.code.match(/.{1,64}/g).join('\n');
   }
   function mailCode(entry) {
     const sep = '------------------------------------------------------------';
