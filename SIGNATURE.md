@@ -1,4 +1,4 @@
-# Profil et signature électronique — V1.2.4
+# Profil et signature électronique — V1.2.5
 
 ## Ce qui change pour l'utilisateur
 
@@ -31,7 +31,7 @@ Le profil reste sur l'appareil. Un nouveau protocole est prérempli automatiquem
 1. Vérifier que l'e-mail vient bien de l'adresse de la personne.
 2. Copier le bloc entre les deux lignes de tirets : la ligne `# Nom – e-mail – date` et les lignes qui commencent par `SBB1.`.
 3. Le coller **à la fin de `utilisateurs.txt`** (fichier texte simple : aucune syntaxe à respecter, les lignes vides, espaces, accents graves ou virgules copiés par erreur sont ignorés).
-4. Incrémenter `CACHE_NAME` dans `sw.js` (ex. `'sbb-protocole-v1.2.3'` — **garder les deux apostrophes**), puis commit → GitHub Pages redéploie.
+4. Incrémenter `CACHE_NAME` dans `sw.js` (ex. `'sbb-protocole-v1.2.6'` — **garder les deux apostrophes**), puis commit → GitHub Pages redéploie.
 
 Si un code est incomplet, la fenêtre de connexion l'indique (« utilisateurs.txt contient 1 code illisible »).
 
@@ -46,6 +46,7 @@ Le code contient la clé de signature **chiffrée** par le mot de passe de la pe
 ## Connexion sur un autre appareil (PC, nouveau téléphone)
 
 Au moment de signer (ou via Mon profil → Se connecter) : choisir son nom, saisir son mot de passe. Pas de nouvelle inscription.
+Le bouton **?** de la fenêtre de connexion (et le lien « Comment créer ma signature ? ») explique le fonctionnement de la signature et sa création.
 - « Rester connecté sur cet appareil » : à décocher sur un PC partagé.
 - Le profil (appareils, signature dessinée) est à refaire sur chaque appareil ; nom, prénom et e-mail sont repris du compte.
 - Mot de passe oublié : se réinscrire ; le responsable révoque l'ancien code.

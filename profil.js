@@ -38,6 +38,26 @@
       mySig: 'Ma signature', drawSig: '✍️ Dessiner ma signature', redrawSig: '✍️ Modifier ma signature', noSig: 'Aucune signature',
       sigHint: 'Reprise dans le champ « Signature » du protocole et dans les signatures électroniques (bas de page et lignes).',
       padTitle: 'Ma signature', padHint: 'Signez dans le cadre', clear: 'Effacer', ok: 'Valider', cancel: 'Annuler', drawFirst: 'Signez d’abord dans le cadre.',
+      helpTitle: "Signature électronique — comment ça marche ?",
+      noAccount: "Pas encore de compte ?",
+      openProfile: "Ouvrir « Mon profil »",
+      close: "Fermer",
+      h1: "À quoi elle sert",
+      p1: "La signature électronique prouve <b>qui</b> a signé le protocole et que les données <b>n’ont pas été modifiées</b> depuis. Les champs signés sont verrouillés 🔒 et le PDF est scellé : toute modification ultérieure (même dans PDF-XChange ou Acrobat) est signalée comme invalide.",
+      h2: "Créer sa signature (une seule fois)",
+      s1: "Ouvrez <b>👤 Mon profil</b> (en haut à droite) : saisissez nom, prénom, e-mail et <b>dessinez votre signature</b>.",
+      s2: "Appuyez sur <b>Créer mon compte</b> et choisissez un mot de passe (12 caractères minimum). Notez-le : il ne peut pas être récupéré.",
+      s3: "Envoyez l’<b>e-mail d’inscription</b> proposé au responsable, sans le modifier.",
+      s4: "Le responsable valide votre inscription. Après la mise à jour de l’application, votre statut passe à <b>✓ Autorisé à signer</b>.",
+      h3: "Signer un protocole",
+      t1: "Appuyez sur <b>✍️ Signer électroniquement</b> et connectez-vous (nom + mot de passe).",
+      t2: "Cochez <b>Données communes</b> (signature en bas de page) et/ou les <b>circuits</b> que vous avez mesurés (signature sur chaque ligne).",
+      t3: "Appuyez sur <b>Signer</b>. Pour un collègue : exportez le JSON ; il l’importe (« Tout remplacer ») et signe ses circuits.",
+      h4: "Bon à savoir",
+      b1: "Sur un autre appareil (PC, nouveau téléphone) : pas de nouvelle inscription, connectez-vous avec votre nom et votre mot de passe, puis redessinez votre signature dans Mon profil.",
+      b2: "Sur un PC partagé, décochez « Rester connecté ».",
+      b3: "Mot de passe oublié : créez un nouveau compte et prévenez le responsable.",
+      howCreate: 'Comment créer ma signature ?',
       loginTitle: 'Connexion', user: 'Utilisateur', password: 'Mot de passe', password2: 'Confirmer le mot de passe',
       remember: 'Rester connecté sur cet appareil (à décocher sur un PC partagé)', badPassword: 'Mot de passe incorrect.',
       noUsers: 'Aucun utilisateur validé pour l’instant. Créez votre compte et attendez sa validation.',
@@ -77,6 +97,26 @@
       mySig: 'Meine Unterschrift', drawSig: '✍️ Unterschrift zeichnen', redrawSig: '✍️ Unterschrift ändern', noSig: 'Keine Unterschrift',
       sigHint: 'Wird im Feld «Unterschrift» und in den elektronischen Unterschriften (unten und pro Zeile) verwendet.',
       padTitle: 'Meine Unterschrift', padHint: 'Im Rahmen unterschreiben', clear: 'Löschen', ok: 'Bestätigen', cancel: 'Abbrechen', drawFirst: 'Bitte zuerst im Rahmen unterschreiben.',
+      helpTitle: "Elektronische Unterschrift — wie funktioniert sie?",
+      noAccount: "Noch kein Konto?",
+      openProfile: "«Mein Profil» öffnen",
+      close: "Schliessen",
+      h1: "Wozu sie dient",
+      p1: "Die elektronische Unterschrift beweist, <b>wer</b> das Protokoll unterschrieben hat und dass die Daten seither <b>nicht geändert</b> wurden. Unterschriebene Felder werden gesperrt 🔒 und das PDF wird versiegelt: jede spätere Änderung (auch in PDF-XChange oder Acrobat) wird als ungültig angezeigt.",
+      h2: "Unterschrift erstellen (nur einmal)",
+      s1: "<b>👤 Mein Profil</b> öffnen (oben rechts): Name, Vorname, E-Mail erfassen und <b>Unterschrift zeichnen</b>.",
+      s2: "<b>Konto erstellen</b> antippen und ein Passwort wählen (mindestens 12 Zeichen). Gut aufbewahren: es kann nicht wiederhergestellt werden.",
+      s3: "Die vorgeschlagene <b>Registrierungs-E-Mail</b> unverändert an den Verantwortlichen senden.",
+      s4: "Der Verantwortliche gibt Ihre Registrierung frei. Nach dem App-Update lautet Ihr Status <b>✓ Unterschriftsberechtigt</b>.",
+      h3: "Ein Protokoll unterschreiben",
+      t1: "<b>✍️ Elektronisch unterschreiben</b> antippen und anmelden (Name + Passwort).",
+      t2: "<b>Gemeinsame Daten</b> (Unterschrift unten) und/oder die gemessenen <b>Stromkreise</b> (Unterschrift pro Zeile) ankreuzen.",
+      t3: "<b>Unterschreiben</b> antippen. Für einen Kollegen: JSON exportieren; er importiert es («Tout remplacer») und unterschreibt seine Stromkreise.",
+      h4: "Gut zu wissen",
+      b1: "Auf einem anderen Gerät (PC, neues Telefon): keine neue Registrierung, mit Name und Passwort anmelden und die Unterschrift in «Mein Profil» neu zeichnen.",
+      b2: "Auf einem gemeinsamen PC «Angemeldet bleiben» deaktivieren.",
+      b3: "Passwort vergessen: neues Konto erstellen und den Verantwortlichen informieren.",
+      howCreate: 'Wie erstelle ich meine Unterschrift?',
       loginTitle: 'Anmeldung', user: 'Benutzer', password: 'Passwort', password2: 'Passwort bestätigen',
       remember: 'Auf diesem Gerät angemeldet bleiben (auf gemeinsamen PCs deaktivieren)', badPassword: 'Falsches Passwort.',
       noUsers: 'Noch kein Benutzer freigegeben. Konto erstellen und Freigabe abwarten.',
@@ -116,6 +156,26 @@
       mySig: 'La mia firma', drawSig: '✍️ Disegnare la firma', redrawSig: '✍️ Modificare la firma', noSig: 'Nessuna firma',
       sigHint: 'Ripresa nel campo «Firma» e nelle firme elettroniche (in basso e per riga).',
       padTitle: 'La mia firma', padHint: 'Firmare nel riquadro', clear: 'Cancellare', ok: 'Confermare', cancel: 'Annullare', drawFirst: 'Firmare prima nel riquadro.',
+      helpTitle: "Firma elettronica — come funziona?",
+      noAccount: "Non ha ancora un account?",
+      openProfile: "Aprire «Il mio profilo»",
+      close: "Chiudere",
+      h1: "A cosa serve",
+      p1: "La firma elettronica prova <b>chi</b> ha firmato il protocollo e che i dati <b>non sono stati modificati</b> da allora. I campi firmati sono bloccati 🔒 e il PDF è sigillato: ogni modifica successiva (anche in PDF-XChange o Acrobat) viene segnalata come non valida.",
+      h2: "Creare la firma (una sola volta)",
+      s1: "Aprire <b>👤 Il mio profilo</b> (in alto a destra): inserire cognome, nome, e-mail e <b>disegnare la firma</b>.",
+      s2: "Premere <b>Creare il mio account</b> e scegliere una password (almeno 12 caratteri). Conservarla: non può essere recuperata.",
+      s3: "Inviare l’<b>e-mail di iscrizione</b> proposta al responsabile, senza modificarla.",
+      s4: "Il responsabile convalida l’iscrizione. Dopo l’aggiornamento dell’app, lo stato diventa <b>✓ Autorizzato a firmare</b>.",
+      h3: "Firmare un protocollo",
+      t1: "Premere <b>✍️ Firmare elettronicamente</b> e accedere (nome + password).",
+      t2: "Selezionare <b>Dati comuni</b> (firma in basso) e/o i <b>circuiti</b> misurati (firma su ogni riga).",
+      t3: "Premere <b>Firmare</b>. Per un collega: esportare il JSON; lo importa («Tout remplacer») e firma i suoi circuiti.",
+      h4: "Da sapere",
+      b1: "Su un altro dispositivo (PC, nuovo telefono): nessuna nuova iscrizione, accedere con nome e password e ridisegnare la firma in «Il mio profilo».",
+      b2: "Su un PC condiviso, deselezionare «Restare connesso».",
+      b3: "Password dimenticata: creare un nuovo account e avvisare il responsabile.",
+      howCreate: 'Come creare la mia firma?',
       loginTitle: 'Accesso', user: 'Utente', password: 'Password', password2: 'Confermare la password',
       remember: 'Restare connesso su questo dispositivo (deselezionare su PC condivisi)', badPassword: 'Password errata.',
       noUsers: 'Nessun utente ancora convalidato. Creare l’account e attendere la convalida.',
@@ -292,20 +352,51 @@
     });
   }
 
+  /* ------------------------------------------------- AIDE SIGNATURE ( ? ) */
+  // notice : message affiché en tête (ex. « aucun utilisateur validé »)
+  function showHelp(notice) {
+    return new Promise(resolve => {
+      const h = s => `<h4 style="font-size:13px;color:var(--navy);margin:14px 0 7px;text-transform:uppercase;letter-spacing:.3px;">${s}</h4>`;
+      const step = (n, html) => `<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;">
+        <span style="flex-shrink:0;width:21px;height:21px;border-radius:50%;background:var(--navy);color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;">${n}</span>
+        <span style="font-size:13px;line-height:1.45;">${html}</span></div>`;
+      const li = html => `<li style="font-size:12.5px;line-height:1.45;margin:0 0 5px 16px;">${html}</li>`;
+      modal(`
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <h3 style="font-size:16px;color:var(--navy);">❓ ${t('helpTitle')}</h3>
+          <button data-act="close" style="background:none;border:none;font-size:24px;line-height:1;color:var(--muted);cursor:pointer;">×</button></div>
+        ${notice ? `<p style="font-size:12.5px;font-weight:700;color:#e65100;background:#fff3e0;border-radius:8px;padding:8px 10px;margin-top:10px;">${notice}</p>` : ''}
+        ${h(t('h1'))}<p style="font-size:13px;line-height:1.5;">${t('p1')}</p>
+        ${h(t('h2'))}${step(1, t('s1'))}${step(2, t('s2'))}${step(3, t('s3'))}${step(4, t('s4'))}
+        ${h(t('h3'))}${step(1, t('t1'))}${step(2, t('t2'))}${step(3, t('t3'))}
+        ${h(t('h4'))}<ul style="padding:0;">${li(t('b1'))}${li(t('b2'))}${li(t('b3'))}</ul>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button data-act="close" style="${btn('#fff', 'var(--muted)', 'flex:1;font-weight:400;')}">${t('close')}</button>
+          <button data-act="profile" style="${btn('var(--navy)', '#fff', 'flex:2;')}">${t('openProfile')}</button></div>`,
+        (act, mm) => {
+          if (act === 'close') { mm.remove(); return resolve(null); }
+          if (act === 'profile') { mm.remove(); resolve('profile'); }
+        });
+    });
+  }
+  const helpBtn = `<button data-act="help" title="?" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--navy);background:#fff;color:var(--navy);font-size:15px;font-weight:800;cursor:pointer;line-height:1;padding:0;">?</button>`;
+
   /* ------------------------------------------------------------- CONNEXION */
   // Ouvre la fenêtre de connexion ; résout la session ou null
   async function login() {
     const reg = (await SA.loadRegistry(true)).filter(u => !u.validUntil);
     if (!reg.length) {
       const info = SA.registryInfo();
-      alert(!info.loaded ? t('noRegistry') : info.errors ? t('badRegistry').replace('{n}', info.errors) : t('noUsers'));
+      const notice = !info.loaded ? t('noRegistry') : info.errors ? t('badRegistry').replace('{n}', info.errors) : t('noUsers');
+      if (await showHelp(notice) === 'profile') open();
       return null;
     }
     const p = load();
     const pre = reg.find(u => p.email && u.email.toLowerCase() === p.email.toLowerCase()) || reg.find(u => u.name === fullName(p));
     return new Promise(resolve => {
       const m = modal(`
-        <h3 style="font-size:15px;color:var(--navy);margin-bottom:14px;">🔑 ${t('loginTitle')}</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <h3 style="font-size:15px;color:var(--navy);">🔑 ${t('loginTitle')}</h3>${helpBtn}</div>
         <label style="${lblCss}">${t('user')}</label>
         <select id="pf-user" style="${inputCss}margin-bottom:11px;">${reg.map(u => `<option value="${u.id}" ${pre && pre.id === u.id ? 'selected' : ''}>${esc(u.name)}${u.email ? ' – ' + esc(u.email) : ''}</option>`).join('')}</select>
         <label style="${lblCss}">${t('password')}</label>
@@ -314,9 +405,15 @@
         <p id="pf-err" style="color:#c62828;font-size:12.5px;font-weight:700;min-height:16px;margin-bottom:6px;"></p>
         <div style="display:flex;gap:8px;">
           <button data-act="close" style="${btn('#fff', 'var(--muted)', 'flex:1;font-weight:400;')}">${t('cancel')}</button>
-          <button data-act="ok" style="${btn('var(--navy)', '#fff', 'flex:2;')}">${t('login')}</button></div>`,
+          <button data-act="ok" style="${btn('var(--navy)', '#fff', 'flex:2;')}">${t('login')}</button></div>
+        <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:12px;">${t('noAccount')}
+          <button data-act="help" style="background:none;border:none;padding:0;color:var(--navy);text-decoration:underline;cursor:pointer;font-size:12px;">${t('howCreate')}</button></p>`,
         async (act, mm, b) => {
           if (act === 'close') { mm.remove(); return resolve(null); }
+          if (act === 'help') {
+            if (await showHelp() === 'profile') { mm.remove(); resolve(null); open(); }
+            return;
+          }
           if (act !== 'ok' || b.disabled) return;
           const u = reg.find(x => x.id === mm.querySelector('#pf-user').value);
           b.disabled = true; b.textContent = t('wait');
@@ -581,7 +678,7 @@
   });
 
   window.Profil = {
-    open, close, login, load, CONFIG,
+    open, close, login, help: showHelp, load, CONFIG,
     getSignature: () => load().signature,
     openMail: url => { location.href = url; },
     openWeb: url => { window.open(url, '_blank', 'noopener'); },

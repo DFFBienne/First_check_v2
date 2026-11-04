@@ -1,6 +1,17 @@
 # Changelog — Protocole Premières Vérifications SBB CFF FFS
 
 ---
+## V1.2.5 — 2026-11-04
+
+### Ajouté
+- **Aide dans la fenêtre de connexion** : bouton « ? » et lien « Comment créer ma signature ? » expliquant le fonctionnement de la signature électronique, sa création et son utilisation (FR/DE/IT). S'affiche aussi automatiquement si aucun utilisateur n'est encore validé.
+- **Mode d'emploi V1.2.5** (`manuel.pdf`, source modifiable `manuel.docx`) : profil, appareils de mesure, signature électronique, PDF scellé, travail à plusieurs, questions fréquentes, annexe responsable — FR/DE/IT.
+
+### Modifié
+- Le bouton « ? » de l'en-tête ouvre le `manuel.pdf` livré avec l'application (et non plus celui du dépôt `First_check`).
+
+---
+
 ## V1.2.4 — 2026-11-04
 
 ### Ajouté
