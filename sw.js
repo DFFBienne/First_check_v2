@@ -1,7 +1,7 @@
 /* Service Worker — SBB CFF FFS Protocole Vérification
    Stratégie : network-first pour les assets, notification de mise à jour */
 
-const CACHE_NAME = 'sbb-protocole-v1.2.0'; // ← Incrémenter à chaque déploiement
+const CACHE_NAME = 'sbb-protocole-v1.2.1'; // ← Incrémenter à chaque déploiement
 
 const ASSETS = [
   './',
