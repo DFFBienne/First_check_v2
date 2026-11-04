@@ -1,6 +1,24 @@
 # Changelog — Protocole Premières Vérifications SBB CFF FFS
 
 ---
+## V1.2.0 — 2026-11-04
+
+### Ajouté
+- **Page « Mon profil »** (bouton en haut à droite) : nom, prénom, e-mail, appareils de mesure (instrument + n° d'inventaire), signature tactile. Repris automatiquement dans chaque nouveau protocole.
+- **Liste déroulante « Instrument »** dans les paramètres de mesure, alimentée par les appareils du profil ; le choix complète le n° d'inventaire.
+- **Signature électronique avancée** (voir `SIGNATURE.md`) :
+  - compte protégé par mot de passe, inscription envoyée par e-mail au responsable, validation par ajout du code dans `utilisateurs.js` ;
+  - connexion sur n'importe quel appareil (nom + mot de passe), demandée uniquement pour signer ;
+  - signature des données communes (bas de page) et/ou des circuits (colonne Collaborateur, ligne par ligne) ; verrouillage de ce qui est signé ; détection de toute modification ;
+  - PDF : signatures sur la page 1, page « Signatures électroniques », JSON signé joint.
+- Nouveaux fichiers : `profil.js`, `signature-avancee.js`, `signature-avancee-ui.js`, `utilisateurs.js`, `SIGNATURE.md`.
+
+### Corrigé
+- **Import JSON** : le premier clic sur « Tout remplacer » provoquait une erreur (fenêtre d'import en double dans `index.html`). Supprimée.
+- **Fournisseur** et **Remarques** (identification) n'étaient ni sauvegardés ni exportés. Ajoutés à la sauvegarde.
+
+---
+
 ## V1.0.9 — 2026-04-20
 
 ### Corrigé

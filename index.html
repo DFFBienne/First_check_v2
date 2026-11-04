@@ -21,7 +21,7 @@
       <div class="hdr-title" id="hdr-title">Premières vérifications<br>par l'installateur électricien</div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
         <a href="https://raw.githubusercontent.com/DFFBienne/First_check/main/manuel.pdf" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.5);color:#fff;font-size:11px;font-weight:800;text-decoration:none;line-height:1;" title="Aide / Manuel">?</a>
-        <div style="font-size:9px;color:rgba(255,255,255,.55);font-weight:600;letter-spacing:.5px;">V1.1.4</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.55);font-weight:600;letter-spacing:.5px;">V1.2.0</div>
         <div class="lang-switcher">
           <button class="lang-btn active" onclick="setLang('fr')">FR</button>
           <button class="lang-btn" onclick="setLang('de')">DE</button>
@@ -227,23 +227,7 @@
   </div>
 </div>
 
-<div id="import-modal" class="sig-modal-bg" style="display:none;">
-  <div class="sig-modal">
-    <div class="sig-modal-hd"><h3>Importer des données</h3></div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5;">Comment souhaitez-vous importer ce fichier ?</p>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <button class="import-choice-btn" onclick="doImport('replace')">
-        <div style="font-size:14px;font-weight:700;color:var(--navy);">🔄 Tout remplacer</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Efface toutes les données actuelles et importe le fichier complet</div>
-      </button>
-      <button class="import-choice-btn" onclick="doImport('merge')">
-        <div style="font-size:14px;font-weight:700;color:var(--navy);">➕ Ajouter les circuits</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Conserve les données actuelles et ajoute uniquement les circuits absents</div>
-      </button>
-      <button onclick="closeImportModal()" style="background:none;border:none;color:var(--muted);font-size:13px;padding:8px;cursor:pointer;text-decoration:underline;">Annuler</button>
-    </div>
-  </div>
-</div>
+<!-- La fenêtre d’import est créée par showImportModal() (app.js) -->
 
 <div id="update-bar" class="update-bar">
   <div class="update-bar-txt">🔄 Nouvelle version disponible !</div>
@@ -257,6 +241,10 @@
 <script src="app.js"></script>
 <script src="pdf-generator.js"></script>
 <script src="signature.js"></script>
+<script src="utilisateurs.js"></script>
+<script src="signature-avancee.js"></script>
+<script src="signature-avancee-ui.js"></script>
+<script src="profil.js"></script>
 
 <script>
 let _newSW = null;

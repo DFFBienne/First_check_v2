@@ -169,7 +169,7 @@ function updateBadge(){$('cct').textContent=circuitIds.length;}
 // ═══════════════════════════════════════════════════════════
 // SAVE / LOAD
 // ═══════════════════════════════════════════════════════════
-const FIELDS=['nom_installation','num_tableau','page','objet','num_compteur','cc_general','cc_abonne','tension','instrument','num_inventaire','facteur_icc','valeur_facteur','vc1','vc2','vc3','vc4','vc5','vc6','vc7','vc8','remarques','nom_prenom','lieu','date_sig'];
+const FIELDS=['nom_installation','num_tableau','page','objet','num_compteur','cc_general','cc_abonne','fournisseur','remarques_install','tension','instrument','num_inventaire','facteur_icc','valeur_facteur','vc1','vc2','vc3','vc4','vc5','vc6','vc7','vc8','remarques','nom_prenom','lieu','date_sig'];
 function saveData(){
   const d={lang:currentLang};
   FIELDS.forEach(f=>d[f]=gv(f));

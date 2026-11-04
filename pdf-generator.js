@@ -70,8 +70,20 @@ async function buildPDFBlob(){
   D.vc={};for(let i=1;i<=8;i++)D.vc['vc'+i]=gv('vc'+i);
   D.circuits=circuitIds.filter(id=>!!$('cc-'+id)).map(id=>({groupe:gv('groupe_'+id),desig:gv('desig_'+id),ctype:gv('ctype_'+id),csect:gv('csect_'+id),courbe:gv('courbe_'+id),inom:gv('inom_'+id),icc_max_lpe:gv('icc_max_lpe_'+id),icc_min_lpe:gv('icc_min_lpe_'+id),icc_max_ln:gv('icc_max_ln_'+id),icc_min_ln:gv('icc_min_ln_'+id),riso:gv('riso_'+id),rlo:gv('rlo_'+id),ddr_inom:gv('ddr_inom_'+id),ddr_idelta:gv('ddr_idelta_'+id),ddr_temps:gv('ddr_temps_'+id),champ:gv('champ_'+id),chute:gv('chute_'+id),rem:gv('rem_'+id),
     collab_nom:(($('collab_signed_'+id)&&$('collab_signed_'+id).checked)?gv('nom_prenom'):(gv('collab_nom_'+id)||'')),
-    collab_sig:(($('collab_signed_'+id)&&$('collab_signed_'+id).checked)?(sigData||''):(gv('collab_sig_'+id)||''))
+    collab_sig:(($('collab_signed_'+id)&&$('collab_signed_'+id).checked)?(sigData||''):(gv('collab_sig_'+id)||'')),
+    uid:(($('cc-'+id)||{}).dataset||{}).uid||''
   }));
+
+  // Signatures électroniques : ligne = signataire du circuit, bas de page = signataire des données communes
+  const ES=window.SignatureUI||null;
+  const esCommon=ES?ES.commonSigner():null;
+  D.circuits.forEach(c=>{
+    const es=ES&&c.uid?ES.signerForCircuit(c.uid):null;
+    if(es){c.collab_nom=es.payload.name;c.collab_sig=es.valid?(es.image||''):'';c.collab_invalid=!es.valid;}
+  });
+  const botNom=esCommon?esCommon.payload.name:D.nom_prenom;
+  const botSig=esCommon?(esCommon.valid?(esCommon.image||''):''):sigData;
+  const botInvalid=!!(esCommon&&!esCommon.valid);
 
   // 1. HEADER — aligné sur les marges du tableau
   const HH=15*MM;
@@ -141,16 +153,18 @@ async function buildPDFBlob(){
       const cx=colX(18),cw=CW[18],pad=2;
       const collabNom=circ.collab_nom||'';
       const collabSig=circ.collab_sig||'';
-      Txt(clip(collabNom,cw-pad*2,4.8,fR),cx+pad,ry+HRD*.72,4.8,fR,BLACK);
+      const nameW=collabSig?cw*0.5:cw-pad*2;
+      Txt(clip(collabNom,nameW-pad,4.8,fR),cx+pad,collabSig?ry+HRD*.36:ry+HRD*.62,4.8,fR,BLACK);
+      if(circ.collab_invalid)TxtC('SIGNATURE INVALIDE',cx,cw,ry+HRD*.16,4.2,fB,REDD);
       if(collabSig){
         try{
           const sb=Uint8Array.from(atob(collabSig.split(',')[1]),c=>c.charCodeAt(0));
           const si=await doc.embedPng(sb);
-          const maxW=cw-pad*2, maxH=HRD*0.52;
+          const zoneX=cx+cw*0.5, maxW=cw*0.5-pad, maxH=HRD*0.86;
           const ratio=si.width/si.height;
           let dw=maxW, dh=dw/ratio;
           if(dh>maxH){dh=maxH;dw=dh*ratio;}
-          page.drawImage(si,{x:cx+(cw-dw)/2,y:ry+HRD*.10,width:dw,height:dh});
+          page.drawImage(si,{x:zoneX+(maxW-dw)/2,y:ry+(HRD-dh)/2,width:dw,height:dh});
         }catch(e){console.warn('Sig collab circuit:',e);}
       }
     }
@@ -235,26 +249,29 @@ async function buildPDFBlob(){
 
   colBox(X3,C3W,T.pdfInstTitle);
   const fmtDate=d=>{if(!d)return'';const p=d.split('-');return p.length===3?p[2]+'.'+p[1]+'.'+p[0]:d;};
-  [[T.pdfNomPrenom,D.nom_prenom||''],[T.pdfLieuDate,(D.lieu||'')+'   '+fmtDate(D.date_sig)]].forEach(([k,v],i)=>{
+  [[T.pdfNomPrenom,botNom||''],[T.pdfLieuDate,(D.lieu||'')+'   '+fmtDate(D.date_sig)]].forEach(([k,v],i)=>{
     const iy=BY+BH-5.5*MM-(i+1)*9*MM;if(i%2===0)R(X3,iy,C3W,9*MM,LGRAY);
     Txt(k,X3+2*MM,iy+5.5*MM,5.8,fB,DGRAY);Txt(clip(v,C3W-4*MM,6,fR),X3+2*MM,iy+2*MM,6,fR,BLACK);
   });
   const sigY=BY+BH-5.5*MM-2*9*MM-8*MM-2*MM-18*MM;
   Txt(T.pdfSignature,X3+2*MM,sigY+4*MM,5.8,fB,DGRAY);
-  if(sigData){
+  if(botSig){
     try{
-      const sigBytes=Uint8Array.from(atob(sigData.split(',')[1]),c=>c.charCodeAt(0));
+      const sigBytes=Uint8Array.from(atob(botSig.split(',')[1]),c=>c.charCodeAt(0));
       const sigImg=await doc.embedPng(sigBytes);
-      const maxSigW = C3W - 2*MM;
-      const maxSigH = BH - 5.5*MM - 2*9*MM - 2*MM;
+      const sigLeft = X3 + 17*MM;                       // à droite du libellé « Signature: »
+      const maxSigW = X3 + C3W - 2*MM - sigLeft;
+      const maxSigH = BH - 5.5*MM - 2*9*MM - 4*MM;
       const ratioImg = sigImg.width / sigImg.height;
       let drawW = maxSigW;
       let drawH = drawW / ratioImg;
       if(drawH > maxSigH){ drawH = maxSigH; drawW = drawH * ratioImg; }
-      const sigX = X3 + (C3W - drawW) / 2;
-      const sigBottom = BY + 1*MM;
+      const sigX = sigLeft + (maxSigW - drawW) / 2;
+      const sigBottom = BY + 2*MM;
       page.drawImage(sigImg,{x:sigX, y:sigBottom, width:drawW, height:drawH});
     }catch(e){ console.warn('Signature PDF error:',e); }
+  } else if(botInvalid){
+    TxtC('SIGNATURE INVALIDE',X3,C3W,BY+8*MM,8,fB,REDD);
   } else {
     L(X3+18*MM,sigY+4*MM,X3+C3W-4*MM,sigY+4*MM,MGRAY,.6);
   }
