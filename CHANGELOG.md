@@ -1,6 +1,16 @@
 # Changelog — Protocole Premières Vérifications SBB CFF FFS
 
 ---
+## V1.2.3 — 2026-11-04
+
+### Ajouté
+- **Envoi de l'inscription via Outlook sur le web** (Microsoft 365) : nouveau bouton dans la fenêtre d'inscription, proposé en premier sur PC. Évite l'ouverture de l'ancien Outlook installé comme programme e-mail par défaut de Windows. Sur téléphone, l'application e-mail reste proposée en premier.
+
+### Modifié
+- Lecture des codes dans `utilisateurs.txt` encore plus tolérante : retours à la ligne perdus par la messagerie, séparateurs ou fin de l'e-mail collés avec le code.
+
+---
+
 ## V1.2.2 — 2026-11-04
 
 ### Modifié

@@ -1,4 +1,4 @@
-# Profil et signature électronique — V1.2.2
+# Profil et signature électronique — V1.2.3
 
 ## Ce qui change pour l'utilisateur
 
@@ -19,7 +19,11 @@ Le profil reste sur l'appareil. Un nouveau protocole est prérempli automatiquem
 
 1. Remplir le profil (nom, prénom, e-mail, signature).
 2. **Créer mon compte** → choisir un mot de passe (12 caractères minimum, ne peut pas être récupéré).
-3. Une fenêtre explique la marche à suivre et pourquoi, puis **Ouvrir l'e-mail** ouvre un message prêt pour **cedric.pedroza@sbb.ch** → **Envoyer**. (« Plus tard » : l'envoi reste possible depuis Mon profil → Renvoyer l'e-mail.)
+3. Une fenêtre explique la marche à suivre et pourquoi, puis ouvre un message prêt pour **cedric.pedroza@sbb.ch** → **Envoyer** :
+   - **Outlook sur le web (Microsoft 365)** : proposé en premier sur PC, ouvre la rédaction dans le navigateur (se connecter à Outlook si demandé) ;
+   - **Application e-mail de l'appareil** : proposé en premier sur téléphone, ouvre le programme e-mail par défaut ;
+   - **Copier le bloc** si aucun des deux ne convient.
+   (« Plus tard » : l'envoi reste possible depuis Mon profil → Renvoyer l'e-mail.)
 4. Statut « ⏳ En attente de validation » jusqu'à l'ajout par le responsable.
 
 ## Validation par le responsable

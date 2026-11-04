@@ -115,10 +115,18 @@
 
   // Lit un code d'inscription (espaces et retours à la ligne ignorés)
   async function parseCode(code, revoque) {
-    const s = String(code || '').replace(/\s+/g, '');
-    if (!s.startsWith(CONFIG.codePrefix)) throw new Error('BAD_CODE');
-    let b;
-    try { b = JSON.parse(dec.decode(unb64url(s.slice(CONFIG.codePrefix.length)))); } catch (e) { throw new Error('BAD_CODE'); }
+    const raw = String(code || '').replace(/[\s`'",;]+/g, '');
+    const at = raw.indexOf(CONFIG.codePrefix);
+    if (at < 0) throw new Error('BAD_CODE');
+    const data = (raw.slice(at + CONFIG.codePrefix.length).match(/^[A-Za-z0-9_-]*/) || [''])[0];
+    // Si du texte a été collé à la suite du code (lignes fusionnées par la
+    // messagerie, séparateur « ---- »…), on cherche la plus longue partie valide.
+    let b = null, len = data.length;
+    for (; len >= 40 && !b; len--) {
+      try { const o = JSON.parse(dec.decode(unb64url(data.slice(0, len)))); if (o && o.v === 1) b = o; } catch (e) { }
+    }
+    if (!b) throw new Error('BAD_CODE');
+    const s = CONFIG.codePrefix + data.slice(0, len + 1);
     if (b.v !== 1 || !b.x || !b.y || !b.k) throw new Error('BAD_CODE');
     const publicJwk = { kty: 'EC', crv: 'P-256', x: b.x, y: b.y };
     return {
@@ -152,9 +160,12 @@
     const flush = () => { if (cur) { items.push(cur); cur = null; } };
     for (const raw of String(txt || '').split(/\r?\n/)) {
       const line = raw.trim();
-      const part = line.replace(/(\/\/|#).*$/, '').replace(/[`'",;{}\[\]]/g, ' ').replace(/^\s*code\s*:/i, '').trim();
+      const m = line.match(/SBB1\.[A-Za-z0-9_-]{20}/); // code, éventuellement précédé d'un commentaire sur la même ligne
+      const k = m ? m.index : -1;
+      const part = (k > 0 ? line.slice(k) : line).replace(/\s(\/\/|#).*$/, '').replace(/^(\/\/|#).*$/, '')
+        .replace(/[`'",;{}\[\]]/g, ' ').replace(/^\s*code\s*:/i, '').trim();
       const rev = line.match(/r[ée]voqu[ée]?\s*:?\s*(\d{4}-\d{2}-\d{2})/i);
-      if (/^SBB1\./.test(part)) { flush(); cur = { code: part.split(/\s+/)[0], revoque: null }; }
+      if (k >= 0 && /^SBB1\./.test(part)) { flush(); cur = { code: part, revoque: null }; }
       else if (cur && /^[A-Za-z0-9_-]+$/.test(part)) cur.code += part;
       else if (part && !rev) flush();
       if (rev) { const target = cur || items[items.length - 1]; if (target) target.revoque = rev[1]; }

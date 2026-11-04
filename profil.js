@@ -50,12 +50,12 @@
       created: 'Compte créé — l’e-mail s’ouvre, il ne reste qu’à l’envoyer.',
       sendTitle: 'Dernière étape : envoyer l’e-mail',
       sendWhy: 'Votre compte est créé sur cet appareil, mais vous <b>ne pouvez pas encore signer</b>.',
-      sendStep1: 'Appuyez sur <b>Ouvrir l’e-mail</b> : un message prérempli s’ouvre dans votre application e-mail.',
+      sendStep1: 'Ouvrez l’e-mail avec l’un des boutons ci-dessous : un message prérempli s’ouvre.',
       sendStep2: '<b>Envoyez-le sans le modifier</b>, depuis votre adresse professionnelle.',
       sendStep3: 'Le responsable vérifie votre identité et ajoute votre code à l’application. Vous pourrez alors signer après la prochaine mise à jour.',
       sendReason: '<b>Pourquoi ?</b> Seules les personnes autorisées à signer selon l’OIBT peuvent apposer une signature électronique. Le responsable doit donc valider chaque nouveau signataire.',
       sendSafe: 'Le code contient votre clé de signature <b>chiffrée par votre mot de passe</b>. Le responsable ne peut pas signer à votre place, et votre mot de passe n’est jamais envoyé.',
-      sendOpen: '✉️ Ouvrir l’e-mail', sendLater: 'Plus tard',
+      sendOpen: '✉️ Application e-mail de l’appareil', sendOwa: '✉️ Outlook sur le web (Microsoft 365)', sendLater: 'Plus tard',
       sendFallback: 'L’e-mail ne s’ouvre pas ? Copiez le bloc et envoyez-le à',
       sendLaterInfo: 'Vous pourrez envoyer l’e-mail plus tard depuis « Mon profil ».',
       mailTo: 'L’inscription est envoyée à', nameDiff: 'Le nom du profil diffère de celui du compte de signature. Les signatures utilisent le nom du compte.',
@@ -89,12 +89,12 @@
       created: 'Konto erstellt — die E-Mail öffnet sich, nur noch senden.',
       sendTitle: 'Letzter Schritt: E-Mail senden',
       sendWhy: 'Ihr Konto ist auf diesem Gerät erstellt, aber Sie <b>können noch nicht unterschreiben</b>.',
-      sendStep1: 'Tippen Sie auf <b>E-Mail öffnen</b>: eine vorausgefüllte Nachricht öffnet sich in Ihrer E-Mail-App.',
+      sendStep1: 'Öffnen Sie die E-Mail mit einer der Schaltflächen unten: eine vorausgefüllte Nachricht öffnet sich.',
       sendStep2: '<b>Senden Sie sie unverändert</b> von Ihrer geschäftlichen Adresse.',
       sendStep3: 'Der Verantwortliche prüft Ihre Identität und fügt Ihren Code der App hinzu. Nach dem nächsten Update können Sie unterschreiben.',
       sendReason: '<b>Warum?</b> Nur gemäss NIV berechtigte Personen dürfen elektronisch unterschreiben. Der Verantwortliche muss deshalb jeden neuen Unterzeichner freigeben.',
       sendSafe: 'Der Code enthält Ihren Signaturschlüssel, <b>mit Ihrem Passwort verschlüsselt</b>. Der Verantwortliche kann nicht für Sie unterschreiben; Ihr Passwort wird nie gesendet.',
-      sendOpen: '✉️ E-Mail öffnen', sendLater: 'Später',
+      sendOpen: '✉️ E-Mail-App des Geräts', sendOwa: '✉️ Outlook im Web (Microsoft 365)', sendLater: 'Später',
       sendFallback: 'Öffnet sich die E-Mail nicht? Block kopieren und senden an',
       sendLaterInfo: 'Sie können die E-Mail später unter «Mein Profil» senden.',
       mailTo: 'Die Registrierung wird gesendet an', nameDiff: 'Der Profilname unterscheidet sich vom Signaturkonto. Unterschriften verwenden den Kontonamen.',
@@ -128,12 +128,12 @@
       created: 'Account creato — l’e-mail si apre, basta inviarla.',
       sendTitle: 'Ultimo passo: inviare l’e-mail',
       sendWhy: 'Il suo account è creato su questo dispositivo, ma <b>non può ancora firmare</b>.',
-      sendStep1: 'Premere <b>Aprire l’e-mail</b>: si apre un messaggio precompilato nella sua app e-mail.',
+      sendStep1: 'Aprire l’e-mail con uno dei pulsanti qui sotto: si apre un messaggio precompilato.',
       sendStep2: '<b>Inviarlo senza modificarlo</b>, dal suo indirizzo professionale.',
       sendStep3: 'Il responsabile verifica la sua identità e aggiunge il codice all’applicazione. Potrà firmare dopo il prossimo aggiornamento.',
       sendReason: '<b>Perché?</b> Solo le persone autorizzate secondo l’OIBT possono apporre una firma elettronica. Il responsabile deve quindi convalidare ogni nuovo firmatario.',
       sendSafe: 'Il codice contiene la sua chiave di firma <b>cifrata con la sua password</b>. Il responsabile non può firmare al suo posto e la password non viene mai inviata.',
-      sendOpen: '✉️ Aprire l’e-mail', sendLater: 'Più tardi',
+      sendOpen: '✉️ App e-mail del dispositivo', sendOwa: '✉️ Outlook sul web (Microsoft 365)', sendLater: 'Più tardi',
       sendFallback: 'L’e-mail non si apre? Copiare il blocco e inviarlo a',
       sendLaterInfo: 'Potrà inviare l’e-mail più tardi da «Il mio profilo».',
       mailTo: 'L’iscrizione è inviata a', nameDiff: 'Il nome del profilo differisce da quello dell’account. Le firme usano il nome dell’account.',
@@ -389,11 +389,17 @@
       <p style="font-size:13px;color:#e65100;margin-bottom:14px;line-height:1.45;">${t('sendWhy')}</p>
       ${step(1, t('sendStep1'))}${step(2, t('sendStep2'))}${step(3, t('sendStep3'))}
       <div style="margin-top:12px;">${box('#eef1f8', t('sendReason'))}${box('#e8f5e9', '🔒 ' + t('sendSafe'))}</div>
-      <button data-act="ok" style="${btn('var(--red)', '#fff', 'margin-top:6px;')}">${t('sendOpen')}</button>
+      ${(() => { // PC : Outlook web en premier ; téléphone : application e-mail en premier
+        const pc = !(window.matchMedia && matchMedia('(pointer:coarse)').matches);
+        const owa = `<button data-act="owa" style="${btn(pc ? 'var(--red)' : '#fff', pc ? '#fff' : 'var(--navy)', 'margin-top:6px;')}">${t('sendOwa')}</button>`;
+        const app = `<button data-act="ok" style="${btn(pc ? '#fff' : 'var(--red)', pc ? 'var(--navy)' : '#fff', 'margin-top:6px;')}">${t('sendOpen')}</button>`;
+        return pc ? owa + app : app + owa;
+      })()}
       <button data-act="close" style="background:none;border:none;color:var(--muted);font-size:13px;text-decoration:underline;cursor:pointer;width:100%;padding:10px;">${t('sendLater')}</button>
       ${hint(t('sendFallback') + ' <b>' + esc(CONFIG.responsableEmail) + '</b> — <button data-act="copy" style="background:none;border:none;padding:0;color:var(--navy);text-decoration:underline;cursor:pointer;font-size:inherit;">' + t('copyCode') + '</button>')}`,
       async (act, mm) => {
         if (act === 'ok') { mm.remove(); return mailCode(entry); }
+        if (act === 'owa') { mm.remove(); return mailCode(entry, 'owa'); }
         if (act === 'copy') {
           const block = codeBlock(entry);
           try { await navigator.clipboard.writeText(block); showToast(t('copied')); } catch (e) { prompt(t('copyCode'), block); }
@@ -407,13 +413,17 @@
   function codeBlock(entry) {
     return '# ' + entry.name + ' – ' + entry.email + ' – ' + (entry.validFrom || '') + '\n' + entry.code.match(/.{1,64}/g).join('\n');
   }
-  function mailCode(entry) {
+  function mailCode(entry, via) {
     const sep = '------------------------------------------------------------';
     const body = t('mailIntro') +
       `${t('nom')} : ${entry.nom}\n${t('prenom')} : ${entry.prenom}\n${t('email')} : ${entry.email}\n\n` +
       `${t('mailBlock')}\n${sep}\n${codeBlock(entry)}\n${sep}\n` + t('mailEnd') + entry.prenom + ' ' + entry.nom;
-    window.Profil.openMail('mailto:' + CONFIG.responsableEmail +
-      '?subject=' + encodeURIComponent(t('subject') + entry.name) + '&body=' + encodeURIComponent(body));
+    const subject = encodeURIComponent(t('subject') + entry.name);
+    if (via === 'owa') {
+      return window.Profil.openWeb('https://outlook.office.com/mail/deeplink/compose?to=' + encodeURIComponent(CONFIG.responsableEmail) +
+        '&subject=' + subject + '&body=' + encodeURIComponent(body));
+    }
+    window.Profil.openMail('mailto:' + CONFIG.responsableEmail + '?subject=' + subject + '&body=' + encodeURIComponent(body));
   }
 
   /* ------------------------------------------------------------------ PAGE */
@@ -574,5 +584,6 @@
     open, close, login, load, CONFIG,
     getSignature: () => load().signature,
     openMail: url => { location.href = url; },
+    openWeb: url => { window.open(url, '_blank', 'noopener'); },
   };
 })();
