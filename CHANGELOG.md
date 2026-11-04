@@ -1,6 +1,14 @@
 # Changelog — Protocole Premières Vérifications SBB CFF FFS
 
 ---
+## V1.2.6 — 2026-11-04
+
+### Corrigé
+- **Révocation** : un compte avec une ligne `REVOQUE` disparaissait de la fenêtre de connexion, même avec une date future ; s'il était seul, l'app affichait « Aucun utilisateur validé ». Les comptes révoqués sont maintenant listés « (révoqué le JJ.MM.AAAA) » et la connexion est refusée avec un message explicatif ; avant la date, le compte fonctionne et le profil affiche « Révocation prévue le … ».
+- `REVOQUE AAAA-MM-JJ` prend effet **à partir de cette date, incluse** (avant : le lendemain). Dates calculées en heure locale.
+
+---
+
 ## V1.2.5 — 2026-11-04
 
 ### Ajouté

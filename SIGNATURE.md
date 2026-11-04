@@ -39,7 +39,7 @@ Si un code est incomplet, la fenêtre de connexion l'indique (« utilisateurs.tx
 ```
 REVOQUE 2026-12-31
 ```
-Ses signatures antérieures restent valides, les suivantes sont refusées.
+La personne est révoquée **à partir de cette date, incluse** (date du jour = révocation immédiate). Ses signatures antérieures restent valides, les suivantes sont refusées. Dans la fenêtre de connexion, le compte apparaît « (révoqué le …) » et la connexion est refusée avec un message ; avant la date, son profil affiche « Révocation prévue le … ».
 
 Le code contient la clé de signature **chiffrée** par le mot de passe de la personne (AES-256, PBKDF2 600 000 itérations). Le responsable ne peut pas signer à sa place.
 

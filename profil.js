@@ -31,6 +31,7 @@
       account: 'Compte de signature', accountInfo: 'Le compte n’est nécessaire que pour signer électroniquement.',
       notConnected: 'Non connecté', login: 'Se connecter', logout: 'Se déconnecter', create: 'Créer mon compte',
       authorized: '✓ Autorisé à signer', pending: '⏳ Inscription en attente de validation', revoked: '⛔ Autorisation révoquée',
+      revokedSince: 'révoqué le {d}', revokedLogin: 'Ce compte a été révoqué le {d} : il ne peut plus signer. Contactez le responsable (cedric.pedroza@sbb.ch) ou créez un nouveau compte.', revokedPlanned: 'Révocation prévue le {d}', allRevoked: 'Tous les comptes de la liste sont révoqués. Créez un nouveau compte ou contactez le responsable.',
       resend: '✉️ Renvoyer l’e-mail d’inscription', copyCode: 'Copier le bloc d’inscription', copied: 'Bloc copié ✓',
       infos: 'Informations personnelles', nom: 'Nom', prenom: 'Prénom', email: 'E-mail',
       devices: 'Appareils de mesure', instrument: 'Instrument', inventaire: 'N° d’inventaire', addDevice: '+ Ajouter un appareil',
@@ -90,6 +91,7 @@
       account: 'Signaturkonto', accountInfo: 'Das Konto wird nur für die elektronische Unterschrift benötigt.',
       notConnected: 'Nicht angemeldet', login: 'Anmelden', logout: 'Abmelden', create: 'Konto erstellen',
       authorized: '✓ Unterschriftsberechtigt', pending: '⏳ Registrierung wartet auf Freigabe', revoked: '⛔ Berechtigung widerrufen',
+      revokedSince: 'widerrufen am {d}', revokedLogin: 'Dieses Konto wurde am {d} widerrufen: Unterschreiben ist nicht mehr möglich. Den Verantwortlichen kontaktieren (cedric.pedroza@sbb.ch) oder ein neues Konto erstellen.', revokedPlanned: 'Widerruf geplant am {d}', allRevoked: 'Alle Konten der Liste sind widerrufen. Neues Konto erstellen oder den Verantwortlichen kontaktieren.',
       resend: '✉️ Registrierungs-E-Mail erneut senden', copyCode: 'Registrierungsblock kopieren', copied: 'Block kopiert ✓',
       infos: 'Persönliche Angaben', nom: 'Name', prenom: 'Vorname', email: 'E-Mail',
       devices: 'Messgeräte', instrument: 'Messgerät', inventaire: 'Inventar-Nr.', addDevice: '+ Messgerät hinzufügen',
@@ -149,6 +151,7 @@
       account: 'Account di firma', accountInfo: 'L’account serve solo per firmare elettronicamente.',
       notConnected: 'Non connesso', login: 'Accedere', logout: 'Disconnettersi', create: 'Creare il mio account',
       authorized: '✓ Autorizzato a firmare', pending: '⏳ Iscrizione in attesa di convalida', revoked: '⛔ Autorizzazione revocata',
+      revokedSince: 'revocato il {d}', revokedLogin: 'Questo account è stato revocato il {d}: non può più firmare. Contattare il responsabile (cedric.pedroza@sbb.ch) o creare un nuovo account.', revokedPlanned: 'Revoca prevista il {d}', allRevoked: 'Tutti gli account dell’elenco sono revocati. Creare un nuovo account o contattare il responsabile.',
       resend: '✉️ Reinviare l’e-mail di iscrizione', copyCode: 'Copiare il blocco di iscrizione', copied: 'Blocco copiato ✓',
       infos: 'Dati personali', nom: 'Cognome', prenom: 'Nome', email: 'E-mail',
       devices: 'Strumenti di misura', instrument: 'Strumento', inventaire: 'N° inventario', addDevice: '+ Aggiungere uno strumento',
@@ -206,6 +209,7 @@
   };
   const t = k => (TXT[currentLang] || TXT.fr)[k];
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmtDay = d => d ? d.split('-').reverse().join('.') : '';
   const validEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e || '');
 
   /* -------------------------------------------------------------- PROFIL */
@@ -384,7 +388,7 @@
   /* ------------------------------------------------------------- CONNEXION */
   // Ouvre la fenêtre de connexion ; résout la session ou null
   async function login() {
-    const reg = (await SA.loadRegistry(true)).filter(u => !u.validUntil);
+    const reg = await SA.loadRegistry(true); // comptes révoqués inclus : ils sont signalés
     if (!reg.length) {
       const info = SA.registryInfo();
       const notice = !info.loaded ? t('noRegistry') : info.errors ? t('badRegistry').replace('{n}', info.errors) : t('noUsers');
@@ -392,13 +396,19 @@
       return null;
     }
     const p = load();
-    const pre = reg.find(u => p.email && u.email.toLowerCase() === p.email.toLowerCase()) || reg.find(u => u.name === fullName(p));
+    const pre = reg.find(u => p.email && u.email.toLowerCase() === p.email.toLowerCase() && !SA.isRevoked(u))
+      || reg.find(u => u.name === fullName(p) && !SA.isRevoked(u))
+      || reg.find(u => p.email && u.email.toLowerCase() === p.email.toLowerCase()) || reg.find(u => !SA.isRevoked(u));
+    const allRevoked = reg.every(u => SA.isRevoked(u));
+    const label = u => esc(u.name) + (u.email ? ' – ' + esc(u.email) : '') + (SA.isRevoked(u) ? ' (' + t('revokedSince').replace('{d}', fmtDay(u.validUntil)) + ')' : '');
     return new Promise(resolve => {
       const m = modal(`
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
           <h3 style="font-size:15px;color:var(--navy);">🔑 ${t('loginTitle')}</h3>${helpBtn}</div>
         <label style="${lblCss}">${t('user')}</label>
-        <select id="pf-user" style="${inputCss}margin-bottom:11px;">${reg.map(u => `<option value="${u.id}" ${pre && pre.id === u.id ? 'selected' : ''}>${esc(u.name)}${u.email ? ' – ' + esc(u.email) : ''}</option>`).join('')}</select>
+        <select id="pf-user" style="${inputCss}margin-bottom:11px;">${reg.map(u => `<option value="${u.id}" ${pre && pre.id === u.id ? 'selected' : ''}>${label(u)}</option>`).join('')}</select>
+        <p id="pf-revoked" style="display:none;color:#c62828;background:#ffebee;border-radius:8px;padding:8px 10px;font-size:12.5px;font-weight:700;line-height:1.45;margin:-4px 0 11px;"></p>
+        ${allRevoked ? `<p style="color:#e65100;font-size:12.5px;font-weight:700;margin:-4px 0 11px;">${t('allRevoked')}</p>` : ''}
         <label style="${lblCss}">${t('password')}</label>
         <input id="pf-pw" type="password" autocomplete="current-password" style="${inputCss}margin-bottom:11px;"/>
         <label style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--text);margin-bottom:8px;"><input id="pf-remember" type="checkbox" checked style="margin-top:2px;"/>${t('remember')}</label>
@@ -416,6 +426,7 @@
           }
           if (act !== 'ok' || b.disabled) return;
           const u = reg.find(x => x.id === mm.querySelector('#pf-user').value);
+          if (SA.isRevoked(u)) { showRevoked(mm, u); return; }
           b.disabled = true; b.textContent = t('wait');
           try {
             const s = await SA.login(u, mm.querySelector('#pf-pw').value, mm.querySelector('#pf-remember').checked);
@@ -425,10 +436,17 @@
             b.disabled = false; b.textContent = t('login');
           }
         });
-      const pw = m.querySelector('#pf-pw');
+      const pw = m.querySelector('#pf-pw'), sel = m.querySelector('#pf-user');
+      const onSel = () => { const u = reg.find(x => x.id === sel.value); showRevoked(m, SA.isRevoked(u) ? u : null); };
+      sel.addEventListener('change', onSel); onSel();
       pw.addEventListener('keydown', e => { if (e.key === 'Enter') m.querySelector('[data-act=ok]').click(); });
       setTimeout(() => pw.focus(), 50);
     });
+  }
+  function showRevoked(m, u) {
+    const el = m.querySelector('#pf-revoked'); if (!el) return;
+    el.style.display = u ? '' : 'none';
+    el.textContent = u ? '⛔ ' + t('revokedLogin').replace('{d}', fmtDay(u.validUntil)) : '';
   }
   function fillFromAccount(u) {
     const p = load(); let ch = false;
@@ -548,12 +566,13 @@
         <button data-pf="login" style="${btn('var(--navy)', '#fff', 'flex:1;')}">${t('login')}</button>
         <button data-pf="register" style="${btn('#fff', 'var(--navy)', 'flex:1;')}">${t('create')}</button></div>`;
     const st = await SA.accountStatus(s.id);
+    const u = await SA.findUser(s.id);
     const color = { authorized: '#2e7d32', pending: '#e65100', revoked: '#c62828' }[st];
     const p = load();
     return `
       <p style="font-size:14px;"><b>${esc(s.name)}</b></p>
       <p style="font-size:12px;color:var(--muted);">${esc(s.email || '')}</p>
-      <p style="font-size:13px;font-weight:700;color:${color};margin:6px 0 10px;">${t(st)}</p>
+      <p style="font-size:13px;font-weight:700;color:${color};margin:6px 0 10px;">${t(st)}${u && u.validUntil ? ' — ' + (st === 'revoked' ? t('revokedSince') : t('revokedPlanned')).replace('{d}', fmtDay(u.validUntil)) : ''}</p>
       ${fullName(p) && fullName(p) !== s.name ? `<p style="font-size:11.5px;color:#e65100;margin-bottom:10px;">${t('nameDiff')}</p>` : ''}
       ${st === 'pending' && s.code ? `<button data-pf="resend" style="${btn('var(--red)', '#fff', 'margin-bottom:8px;')}">${t('resend')}</button>
         <button data-pf="copy" style="${btn('#fff', 'var(--navy)', 'margin-bottom:8px;')}">${t('copyCode')}</button>` : ''}

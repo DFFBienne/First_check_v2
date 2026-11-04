@@ -10,6 +10,7 @@
 # RÉVOQUER une personne (départ, mot de passe compromis) : NE PAS supprimer
 #   son bloc, mais ajouter juste en dessous une ligne :
 #     REVOQUE 2026-12-31
+#   Révoqué À PARTIR de cette date, incluse (date du jour = immédiat).
 #   Ses signatures antérieures à cette date restent valides.
 #
 # Les lignes qui commencent par # sont des commentaires.
@@ -27,5 +28,3 @@ Oa1MyTjhpZGItRUtBeE1rS2dNVVk4cG1JYnU4UzFqQXRDRzFBWDh1cFRPemFaM0g
 zUzFRZjZaaDB2NDluN01POXpTbDF5bzF0c0pBeEZTM0FzS0NtWDFsLUNDdnc2WEs
 zSVlMSHlha2JrbWpGcVFWSE44WUJhTnNNZTZOYWkyWlA1TWZDc0RrRS1CRWNBZVQ
 2RWpZZlNTa0FScE5tbE9pYUk5OU41NnRiM1hVUWNxVUNrdnJLZGpvZyJ9
-
-REVOQUE 2026-11-03

@@ -199,7 +199,11 @@
     if (!session) { session = window.Profil ? await Profil.login() : null; if (!session) return; }
     accStatus = await SA.accountStatus(session.id);
     if (accStatus === 'pending') { alert(t('pending')); return render(); }
-    if (accStatus === 'revoked') { alert(t('revoked')); return render(); }
+    if (accStatus === 'revoked') {
+      const u = await SA.findUser(session.id);
+      alert(t('revoked') + (u && u.validUntil ? ' (' + u.validUntil.split('-').reverse().join('.') + ')' : ''));
+      return render();
+    }
     const image = (window.Profil && Profil.getSignature()) || null;
     if (!image) { showToast(t('noSig'), 3500); if (window.Profil) Profil.open(); return; }
 

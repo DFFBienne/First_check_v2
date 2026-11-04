@@ -198,12 +198,16 @@
     return (_registry = out);
   }
   const registryInfo = () => _registryInfo;
+  // Date locale AAAA-MM-JJ (et non UTC : évite un décalage d'un jour autour de minuit)
+  const localDay = d => { d = d ? new Date(d) : new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  // « REVOQUE 2026-12-31 » : révoqué À PARTIR de cette date (incluse)
+  const isRevoked = (u, day) => !!(u && u.validUntil && (day || localDay()) >= u.validUntil);
   async function findUser(id) { return (await loadRegistry()).find(u => u.id === id) || null; }
   // 'authorized' | 'pending' (absent du registre) | 'revoked'
   async function accountStatus(id) {
     const u = await findUser(id);
     if (!u) return 'pending';
-    if (u.validUntil && new Date().toISOString().slice(0, 10) > u.validUntil) return 'revoked';
+    if (isRevoked(u)) return 'revoked';
     return 'authorized';
   }
 
@@ -286,8 +290,8 @@
       results.push(r);
       const u = registry.find(a => a.id === payload.signerId);
       if (!u) { r.status = 'unknown_signer'; continue; }
-      const day = payload.signedAt.slice(0, 10);
-      if ((u.validFrom && day < u.validFrom) || (u.validUntil && day > u.validUntil)) { r.status = 'expired'; continue; }
+      const day = localDay(payload.signedAt);
+      if ((u.validFrom && day < u.validFrom) || isRevoked(u, day)) { r.status = 'expired'; continue; }
       let ok = false;
       try {
         const pub = await subtle.importKey('jwk', { ...u.publicJwk, ext: true }, ALG, false, ['verify']);
@@ -302,7 +306,7 @@
   }
 
   global.SignatureAvancee = {
-    CONFIG, createAccount, parseCode, unlock, loadRegistry, registryInfo, parseRegistryText, findUser, accountStatus,
+    CONFIG, createAccount, parseCode, unlock, loadRegistry, registryInfo, parseRegistryText, findUser, accountStatus, isRevoked, localDay,
     login, openSession, getSession, logout,
     sign, verify, lockedScope, unsignedCircuits, circuitId,
     _canonical: canonical, _sha256: sha256,
