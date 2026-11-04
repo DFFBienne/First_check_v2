@@ -46,6 +46,16 @@
       regSend: 'Valider l’inscription', pwShort: 'Le mot de passe doit contenir au moins 12 caractères.', pwDiff: 'Les deux mots de passe sont différents.',
       fillFirst: 'Complétez d’abord nom, prénom, e-mail valide et votre signature.',
       created: 'Compte créé — l’e-mail s’ouvre, il ne reste qu’à l’envoyer.',
+      sendTitle: 'Dernière étape : envoyer l’e-mail',
+      sendWhy: 'Votre compte est créé sur cet appareil, mais vous <b>ne pouvez pas encore signer</b>.',
+      sendStep1: 'Appuyez sur <b>Ouvrir l’e-mail</b> : un message prérempli s’ouvre dans votre application e-mail.',
+      sendStep2: '<b>Envoyez-le sans le modifier</b>, depuis votre adresse professionnelle.',
+      sendStep3: 'Le responsable vérifie votre identité et ajoute votre code à l’application. Vous pourrez alors signer après la prochaine mise à jour.',
+      sendReason: '<b>Pourquoi ?</b> Seules les personnes autorisées à signer selon l’OIBT peuvent apposer une signature électronique. Le responsable doit donc valider chaque nouveau signataire.',
+      sendSafe: 'Le code contient votre clé de signature <b>chiffrée par votre mot de passe</b>. Le responsable ne peut pas signer à votre place, et votre mot de passe n’est jamais envoyé.',
+      sendOpen: '✉️ Ouvrir l’e-mail', sendLater: 'Plus tard',
+      sendFallback: 'L’e-mail ne s’ouvre pas ? Copiez le bloc et envoyez-le à',
+      sendLaterInfo: 'Vous pourrez envoyer l’e-mail plus tard depuis « Mon profil ».',
       mailTo: 'L’inscription est envoyée à', nameDiff: 'Le nom du profil diffère de celui du compte de signature. Les signatures utilisent le nom du compte.',
       confirmLogout: 'Se déconnecter de cet appareil ?', other: 'Autre…', current: 'actuel',
       wait: '⏳ Vérification…',
@@ -73,6 +83,16 @@
       regSend: 'Registrierung absenden', pwShort: 'Das Passwort muss mindestens 12 Zeichen haben.', pwDiff: 'Die Passwörter stimmen nicht überein.',
       fillFirst: 'Bitte zuerst Name, Vorname, gültige E-Mail und Unterschrift erfassen.',
       created: 'Konto erstellt — die E-Mail öffnet sich, nur noch senden.',
+      sendTitle: 'Letzter Schritt: E-Mail senden',
+      sendWhy: 'Ihr Konto ist auf diesem Gerät erstellt, aber Sie <b>können noch nicht unterschreiben</b>.',
+      sendStep1: 'Tippen Sie auf <b>E-Mail öffnen</b>: eine vorausgefüllte Nachricht öffnet sich in Ihrer E-Mail-App.',
+      sendStep2: '<b>Senden Sie sie unverändert</b> von Ihrer geschäftlichen Adresse.',
+      sendStep3: 'Der Verantwortliche prüft Ihre Identität und fügt Ihren Code der App hinzu. Nach dem nächsten Update können Sie unterschreiben.',
+      sendReason: '<b>Warum?</b> Nur gemäss NIV berechtigte Personen dürfen elektronisch unterschreiben. Der Verantwortliche muss deshalb jeden neuen Unterzeichner freigeben.',
+      sendSafe: 'Der Code enthält Ihren Signaturschlüssel, <b>mit Ihrem Passwort verschlüsselt</b>. Der Verantwortliche kann nicht für Sie unterschreiben; Ihr Passwort wird nie gesendet.',
+      sendOpen: '✉️ E-Mail öffnen', sendLater: 'Später',
+      sendFallback: 'Öffnet sich die E-Mail nicht? Block kopieren und senden an',
+      sendLaterInfo: 'Sie können die E-Mail später unter «Mein Profil» senden.',
       mailTo: 'Die Registrierung wird gesendet an', nameDiff: 'Der Profilname unterscheidet sich vom Signaturkonto. Unterschriften verwenden den Kontonamen.',
       confirmLogout: 'Auf diesem Gerät abmelden?', other: 'Andere…', current: 'aktuell',
       wait: '⏳ Prüfung…',
@@ -100,6 +120,16 @@
       regSend: 'Convalidare l’iscrizione', pwShort: 'La password deve contenere almeno 12 caratteri.', pwDiff: 'Le password non corrispondono.',
       fillFirst: 'Completare prima cognome, nome, e-mail valida e firma.',
       created: 'Account creato — l’e-mail si apre, basta inviarla.',
+      sendTitle: 'Ultimo passo: inviare l’e-mail',
+      sendWhy: 'Il suo account è creato su questo dispositivo, ma <b>non può ancora firmare</b>.',
+      sendStep1: 'Premere <b>Aprire l’e-mail</b>: si apre un messaggio precompilato nella sua app e-mail.',
+      sendStep2: '<b>Inviarlo senza modificarlo</b>, dal suo indirizzo professionale.',
+      sendStep3: 'Il responsabile verifica la sua identità e aggiunge il codice all’applicazione. Potrà firmare dopo il prossimo aggiornamento.',
+      sendReason: '<b>Perché?</b> Solo le persone autorizzate secondo l’OIBT possono apporre una firma elettronica. Il responsabile deve quindi convalidare ogni nuovo firmatario.',
+      sendSafe: 'Il codice contiene la sua chiave di firma <b>cifrata con la sua password</b>. Il responsabile non può firmare al suo posto e la password non viene mai inviata.',
+      sendOpen: '✉️ Aprire l’e-mail', sendLater: 'Più tardi',
+      sendFallback: 'L’e-mail non si apre? Copiare il blocco e inviarlo a',
+      sendLaterInfo: 'Potrà inviare l’e-mail più tardi da «Il mio profilo».',
       mailTo: 'L’iscrizione è inviata a', nameDiff: 'Il nome del profilo differisce da quello dell’account. Le firme usano il nome dell’account.',
       confirmLogout: 'Disconnettersi da questo dispositivo?', other: 'Altro…', current: 'attuale',
       wait: '⏳ Verifica…',
@@ -333,9 +363,33 @@
           const acc = await SA.createAccount({ nom: p.nom, prenom: p.prenom, email: p.email, password: pw1 });
           await SA.openSession(acc.entry, acc.privateKey, true);
           mm.remove(); refreshAll();
-          showToast(t('created'), 3500);
-          mailCode(acc.entry);
+          explainMail(acc.entry);
         } catch (e) { err.textContent = e.message; b.disabled = false; b.textContent = t('regSend'); }
+      });
+  }
+
+  // Fenêtre explicative avant l'envoi de l'e-mail d'inscription
+  function explainMail(entry) {
+    const step = (n, html) => `<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:9px;">
+      <span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;">${n}</span>
+      <span style="font-size:13px;line-height:1.45;">${html}</span></div>`;
+    const box = (bg, html) => `<p style="font-size:12px;line-height:1.5;background:${bg};border-radius:8px;padding:9px 11px;margin-bottom:8px;">${html}</p>`;
+    modal(`
+      <h3 style="font-size:16px;color:var(--navy);margin-bottom:6px;">📨 ${t('sendTitle')}</h3>
+      <p style="font-size:13px;color:#e65100;margin-bottom:14px;line-height:1.45;">${t('sendWhy')}</p>
+      ${step(1, t('sendStep1'))}${step(2, t('sendStep2'))}${step(3, t('sendStep3'))}
+      <div style="margin-top:12px;">${box('#eef1f8', t('sendReason'))}${box('#e8f5e9', '🔒 ' + t('sendSafe'))}</div>
+      <button data-act="ok" style="${btn('var(--red)', '#fff', 'margin-top:6px;')}">${t('sendOpen')}</button>
+      <button data-act="close" style="background:none;border:none;color:var(--muted);font-size:13px;text-decoration:underline;cursor:pointer;width:100%;padding:10px;">${t('sendLater')}</button>
+      ${hint(t('sendFallback') + ' <b>' + esc(CONFIG.responsableEmail) + '</b> — <button data-act="copy" style="background:none;border:none;padding:0;color:var(--navy);text-decoration:underline;cursor:pointer;font-size:inherit;">' + t('copyCode') + '</button>')}`,
+      async (act, mm) => {
+        if (act === 'ok') { mm.remove(); return mailCode(entry); }
+        if (act === 'copy') {
+          const block = codeBlock(entry);
+          try { await navigator.clipboard.writeText(block); showToast(t('copied')); } catch (e) { prompt(t('copyCode'), block); }
+          return;
+        }
+        if (act === 'close') { mm.remove(); showToast(t('sendLaterInfo'), 3500); }
       });
   }
 
@@ -443,7 +497,7 @@
     if (act === 'logout') return logout();
     const s = await SA.getSession(); if (!s || !s.code) return;
     const entry = await SA.parseCode(s.code);
-    if (act === 'resend') return mailCode(entry);
+    if (act === 'resend') return explainMail(entry);
     if (act === 'copy') {
       const block = codeBlock(entry);
       try { await navigator.clipboard.writeText(block); showToast(t('copied')); } catch (e) { prompt(t('copyCode'), block); }
