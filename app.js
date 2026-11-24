@@ -41,13 +41,11 @@ function applyLang() {
   st('lbl-instrument', T.lblInstrument);
   st('lbl-inventaire', T.lblInventaire);
   st('lbl-facteur', T.lblFacteur);
-  st('lbl-val-facteur', T.lblValFacteur);
   st('lbl-rem', T.lblRem);
   st('lbl-nom-prenom', T.lblNomPrenom);
   st('lbl-lieu', T.lblLieu);
   st('lbl-date', T.lblDate);
   st('lbl-gires', T.lblGires);
-  st('lbl-regime', T.lblRegime);
   st('lbl-instr-autres', T.lblInstrAutres);
   translateLists();
 
@@ -73,8 +71,8 @@ function applyLang() {
 const SKEY='sbb_proto_v3';
 let circuitIds=[],nextId=1,autoTimer=null;
 const $=id=>document.getElementById(id);
-function gv(id){const e=$(id);if(!e)return'';return e.type==='checkbox'?e.checked:(e.value||'');}
-function sv(id,v){const e=$(id);if(!e)return;e.type==='checkbox'?e.checked=!!v:e.value=v;}
+function gv(id){const e=$(id);if(!e)return'';if(e.dataset&&e.dataset.bool){const v=e.value;return v==='true'?true:v==='false'?false:v;}return e.type==='checkbox'?e.checked:(e.value||'');}
+function sv(id,v){const e=$(id);if(!e)return;if(e.dataset&&e.dataset.bool){setVc(e,v);return;}e.type==='checkbox'?e.checked=!!v:e.value=v;}
 function showToast(msg,dur=2200){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 function markUnsaved(){$('saveDot').className='dot unsaved';$('saveTxt').textContent=I18N[currentLang].unsaved;}
 function markSaved(){$('saveDot').className='dot';$('saveTxt').textContent=I18N[currentLang].saved;}
@@ -143,8 +141,9 @@ function addCircuit(data){
     <span class="sub-lbl" data-lbl="sublMes2">${T.sublMes2||T.pdfGrpMes}</span>
     <div class="mg">
       <div class="mf"><label data-lbl="lblChamp" class="req">${T.lblChamp}</label>${selectHTML('champ_'+id,'champ',(data&&data.champ)||'')}</div>
-      <div class="mf"><label data-lbl="lblChute">${T.lblChute}</label><input type="number" step="0.1" id="chute_${id}" value="${(data&&data.chute)||''}"/></div>
+      <div class="mf"><label data-lbl="lblRegime" class="req">${T.lblRegime}</label>${selectHTML('regime_'+id,'regime',data?(data.regime||''):lastRegime())}</div>
     </div>
+    <input type="hidden" id="chute_${id}" value="${escH((data&&data.chute)||'')}"/>
     <span class="sub-lbl" data-lbl="sublRem">${T.sublRem||'Remarque'}</span>
     <textarea id="rem_${id}" rows="2" placeholder="${T.lblRemCircuit||'Remarque sur ce circuit...'}" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;background:#fff;color:var(--text);width:100%;outline:none;resize:vertical;min-height:48px;">${(data&&data.rem)||''}</textarea>`;
   box.appendChild(d);
@@ -181,7 +180,7 @@ const FIELDS=['nom_installation','num_tableau','page','objet','num_compteur','cc
 // Champs ajoutés en V1.3.0 : écrits seulement s'ils sont remplis, pour que l'empreinte
 // des protocoles signés avec une version antérieure reste identique.
 const NEW_COMMON=['num_gires','regime_neutre','instrument2','instrument3'];
-const NEW_CIRCUIT=['ddr_desig','ddr_type','ddr_idecl'];
+const NEW_CIRCUIT=['ddr_desig','ddr_type','ddr_idecl','regime'];
 function commonData(d){FIELDS.forEach(f=>d[f]=gv(f));NEW_COMMON.forEach(f=>{if(d[f]==='')delete d[f];});return d;}
 function circuitData(id){
   const c={groupe:gv('groupe_'+id),desig:gv('desig_'+id),ctype:gv('ctype_'+id),csect:gv('csect_'+id),
@@ -523,6 +522,7 @@ new MutationObserver(muts=>muts.forEach(m=>{
 })).observe(document.body,{subtree:true,attributes:true,attributeFilter:['readonly','disabled']});
 
 function translateLists(){
+  if(typeof renderVcSelects==='function'&&document.querySelector('select[data-bool] option'))renderVcSelects();
   document.querySelectorAll('select[data-list]').forEach(sel=>{
     const list=sel.dataset.list,T=I18N[currentLang];
     [...sel.options].forEach(o=>{
@@ -539,13 +539,31 @@ function setField(f,v){
   const el=$(f);
   if(el&&el.tagName==='SELECT'&&el.dataset.list){el.innerHTML=optionsHTML(el.dataset.list,v||'',false);el.value=v||'';return;}
   // Clé absente d'un ancien protocole : champ vidé (et non « undefined »)
-  if(v===undefined||v===null){const e=$(f);if(e&&e.type!=='checkbox'){e.value='';return;}}
+  if(v===undefined||v===null){const e=$(f);if(e&&e.type!=='checkbox'&&!(e.dataset&&e.dataset.bool)){e.value='';return;}}
   sv(f,v);
 }
-function renderCommonSelects(){
-  const el=$('regime_neutre');if(el&&!el.options.length)el.innerHTML=optionsHTML('regime','',false);
+// V1.3.1 — régime de neutre par circuit : un nouveau circuit reprend celui du circuit précédent
+function lastRegime(){
+  for(let i=circuitIds.length-1;i>=0;i--){const v=gv('regime_'+circuitIds[i]);if(v)return v;}
+  return gv('regime_neutre')||'';
 }
-renderCommonSelects();
+
+// V1.3.1 — Vérifications visuelles en liste déroulante.
+// Valeurs enregistrées : true (conforme / oui), false (non conforme), 'NA'.
+// true / false = mêmes valeurs que les anciennes cases à cocher → signatures existantes intactes.
+const VC_KINDS={conf:['true','false','NA'],oui:['true','NA']};
+function vcOptLabel(kind,v){const o=(I18N[currentLang].vcOpts)||{};
+  if(kind==='oui')return v==='true'?o.oui:v==='false'?(o.non+' ('+(I18N[currentLang].optLegacy||'')+')'):o.NA;
+  return o[v]||v;}
+function setVc(e,v){
+  const kind=e.dataset.bool,val=v===true?'true':v===false?'false':(v==null||v===''?'true':String(v));
+  const vals=VC_KINDS[kind].slice();if(!vals.includes(val))vals.push(val);
+  e.innerHTML=vals.map(x=>`<option value="${escH(x)}">${escH(vcOptLabel(kind,x))}</option>`).join('');
+  e.value=val;e.className='vc-sel st-'+val;
+}
+function renderVcSelects(){document.querySelectorAll('select[data-bool]').forEach(e=>setVc(e,e.options.length?gv(e.id):true));}
+document.addEventListener('change',e=>{if(e.target.dataset&&e.target.dataset.bool)e.target.className='vc-sel st-'+e.target.value;});
+renderVcSelects();
 
 // R iso. : 2 décimales obligatoires (ex. 156,36) — complétées automatiquement
 function fmtRiso(v){
@@ -583,14 +601,15 @@ function checkRequired(){
   group=$('sec-install-hd').textContent.trim();
   ['objet','num_tableau','cc_general','cc_abonne','fournisseur'].forEach(id=>need(id));
   group=$('sec-mesures-hd').textContent.trim();
-  ['regime_neutre','instrument'].forEach(id=>need(id));
-  if(gv('facteur_icc')==='OUI')need('valeur_facteur',v=>/^\d+([.,]\d+)?$/.test(v),T.reqNumber);
+  need('valeur_facteur',v=>/^\d+([.,]\d+)?$/.test(v),T.reqNumber);
+  need('instrument');
   circuitIds.filter(id=>!!$('cc-'+id)).forEach((id,i)=>{
     group=(T.reqCircuit||'Circuit')+' '+(gv('groupe_'+id)||(i+1))+(gv('desig_'+id)?' — '+gv('desig_'+id):'');
     const r=$('riso_'+id);
     if(r&&!locked(r)&&r.value){const f=fmtRiso(r.value);if(f)r.value=f;}
     need('ctype_'+id);need('courbe_'+id);need('riso_'+id,v=>RISO_OK.test(v),T.reqRisoFmt);
     need('champ_'+id,v=>LISTS.champ.some(x=>x[0]===v),T.reqChooseList);
+    if(!gv('regime_neutre'))need('regime_'+id);   // protocole V1.3.0 : régime commun encore valable
     need('ddr_desig_'+id);
     const desig=gv('ddr_desig_'+id);
     if(desig&&desig!=='AUCUN'){

@@ -21,7 +21,7 @@
       <div class="hdr-title" id="hdr-title">Premières vérifications<br>par l'installateur électricien</div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
         <a href="manuel.pdf" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.5);color:#fff;font-size:11px;font-weight:800;text-decoration:none;line-height:1;" title="Aide / Manuel">?</a>
-        <div style="font-size:9px;color:rgba(255,255,255,.55);font-weight:600;letter-spacing:.5px;">V1.3.0</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.55);font-weight:600;letter-spacing:.5px;">V1.3.1</div>
         <div class="lang-switcher">
           <button class="lang-btn active" onclick="setLang('fr')">FR</button>
           <button class="lang-btn" onclick="setLang('de')">DE</button>
@@ -65,20 +65,16 @@
   <div class="sec-bd">
     <div class="row2">
       <div class="f"><label id="lbl-tension">Tension réseau</label><input type="text" id="tension" value="240V" placeholder="Ex: 240V"/></div>
-      <div class="f"><label id="lbl-regime" class="req">Régime de neutre</label><select id="regime_neutre" data-list="regime"></select></div>
+      <div class="f"><label id="lbl-facteur" class="req">Facteur Icc utilisé</label><input type="text" inputmode="decimal" id="valeur_facteur" placeholder="Ex: 0,75" autocomplete="off"/></div>
     </div>
+    <!-- Anciennes données conservées pour les protocoles existants (signatures) : plus affichées -->
+    <input type="hidden" id="facteur_icc" value="OUI"/><input type="hidden" id="regime_neutre" value=""/>
     <div class="row2">
       <div class="f"><label id="lbl-instrument" class="req">Instrument(s) de mesure</label><input type="text" id="instrument" value="Metrel"/></div>
       <div class="f"><label id="lbl-inventaire">N° inventaire</label><input type="text" id="num_inventaire" placeholder="Ex: I-68266"/></div>
     </div>
     <div class="f"><label id="lbl-instr-autres">Autres appareils de mesure</label>
       <div class="row2"><input type="text" id="instrument2" data-ph="phInstrAutre" placeholder="Autre appareil (saisie libre)..."/><input type="text" id="instrument3" data-ph="phInstrAutre" placeholder="Autre appareil (saisie libre)..."/></div>
-    </div>
-    <div class="row2">
-      <div class="f"><label id="lbl-facteur">Facteur Icc utilisé</label>
-        <select id="facteur_icc"><option value="NON">NON</option><option value="OUI" selected>OUI</option></select>
-      </div>
-      <div class="f"><label id="lbl-val-facteur" class="req">Valeur facteur</label><input type="text" inputmode="decimal" id="valeur_facteur" value="1" list="facteur-list" autocomplete="off"/><datalist id="facteur-list"><option value="1,00"/><option value="0,80"/><option value="0,75"/></datalist></div>
     </div>
   </div>
 </div>
@@ -99,13 +95,13 @@
 <div class="sec" style="margin-top:10px;">
   <div class="sec-hd" id="sec-vc-hd">Vérifications visuelles</div>
   <div id="vcList">
-    <div class="ck-item"><span class="ck-lbl" id="vc-lbl-1">Protection de base des contacts directs</span><label class="tgl"><input type="checkbox" id="vc1" checked/><span class="tgl-sl"></span></label></div>
+    <div class="ck-item"><span class="ck-lbl" id="vc-lbl-1">Protection de base des contacts directs</span><select id="vc1" class="vc-sel" data-bool="conf"></select></div>
     <div class="ck-item"><span class="ck-lbl" id="vc-lbl-2">Identification des coupe-surintensités, liste de référence</span><label class="tgl"><input type="checkbox" id="vc2" checked/><span class="tgl-sl"></span></label></div>
     <div class="ck-item"><span class="ck-lbl" id="vc-lbl-3">Présence de schémas à jour</span><label class="tgl"><input type="checkbox" id="vc3" checked/><span class="tgl-sl"></span></label></div>
     <div class="ck-item"><span class="ck-lbl" id="vc-lbl-4">Dispositions et marquages des conducteurs</span><label class="tgl"><input type="checkbox" id="vc4" checked/><span class="tgl-sl"></span></label></div>
     <div class="ck-item"><span class="ck-lbl" id="vc-lbl-5">Choix des matériaux selon le genre de local</span><label class="tgl"><input type="checkbox" id="vc5" checked/><span class="tgl-sl"></span></label></div>
     <div class="ck-item"><span class="ck-lbl" id="vc-lbl-6">Organe de coupure et de déclenchement</span><label class="tgl"><input type="checkbox" id="vc6" checked/><span class="tgl-sl"></span></label></div>
-    <div class="ck-item"><span class="ck-lbl" id="vc-lbl-7">Présence de barrières coupe-feu</span><label class="tgl"><input type="checkbox" id="vc7" checked/><span class="tgl-sl"></span></label></div>
+    <div class="ck-item"><span class="ck-lbl" id="vc-lbl-7">Présence de barrières coupe-feu</span><select id="vc7" class="vc-sel" data-bool="oui"></select></div>
     <div class="ck-item"><span class="ck-lbl" id="vc-lbl-8">Choix et réglage des protections (thermique)</span><label class="tgl"><input type="checkbox" id="vc8" checked/><span class="tgl-sl"></span></label></div>
   </div>
 </div>

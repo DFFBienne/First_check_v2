@@ -1,6 +1,32 @@
 # Changelog — Protocole Premières Vérifications SBB CFF FFS
 
 ---
+## V1.3.1 — 2026-11-24
+
+### Paramètres de mesure
+- « Valeur facteur » supprimé : **« Facteur Icc utilisé »** devient une saisie numérique obligatoire (vide par défaut, virgule acceptée).
+- « Régime de neutre » déplacé dans les circuits.
+
+### Circuits / groupes
+- **Régime de neutre** par circuit (obligatoire) ; un nouveau circuit reprend celui du circuit précédent. Colonne « Régime neutre » dans le PDF.
+- **Chute de tension %** supprimée (formulaire et PDF).
+
+### Vérifications visuelles
+- 1 : « Protection de base des contacts directs (IP2x) » — liste Conforme / Non conforme / N.A.
+- 2 : « Identification des coupe-surintensités » (sans « liste de référence »).
+- 3 : « Présence des schémas, listing et schémas à jour ».
+- 4 : « … des conducteurs (étiquetage, section, couleur, ...) ».
+- 5 : « … selon le genre de local (IP, CPR respecté) ».
+- 6 : « Organe de coupure et de déclenchement (interrupteur cadenassable, ...) ».
+- 7 : « Obturation coupe-feu réalisée (photo si à faire par la suite) » — liste Oui / N.A.
+- 8 : « Liaison(s) équipotentielle(s) effectuée(s) (si oui, les protocoler dans le PM) ».
+- PDF : état OK / NOK / N.A.
+
+### Compatibilité
+- Protocoles V1.2.6 / V1.3.0 lisibles et signatures intactes : la chute de tension, l'ancien choix OUI/NON du facteur et le régime de neutre commun de la V1.3.0 restent conservés (non affichés) ; ce régime commun sert de valeur pour les circuits qui n'en ont pas.
+- Vérifications 1 et 7 : « Conforme »/« Oui » = ancienne case cochée, « Non conforme » = décochée. Une ancienne case 7 décochée s'affiche « Non (ancienne valeur) ».
+
+---
 ## V1.3.0 — 2026-11-10
 
 Remarques officielles de la séance PdM du 22.10.2026.

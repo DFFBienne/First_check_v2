@@ -88,14 +88,14 @@ const I18N = {
     lblSig:          "Signature",
     sigPlaceholder:  "Appuyez pour signer...",
     vcLabels: [
-      "Protection de base des contacts directs",
-      "Identification des coupe-surintensités, liste de référence",
-      "Présence de schémas à jour",
-      "Dispositions et marquages des conducteurs",
-      "Choix des matériaux selon le genre de local",
-      "Organe de coupure et de déclenchement",
-      "Présence de barrières coupe-feu",
-      "Choix et réglage des protections (thermique)"
+      "Protection de base des contacts directs (IP2x)",
+      "Identification des coupe-surintensités",
+      "Présence des schémas, listing et schémas à jour",
+      "Dispositions et marquages des conducteurs (étiquetage, section, couleur, ...)",
+      "Choix des matériaux selon le genre de local (IP, CPR respecté)",
+      "Organe de coupure et de déclenchement (interrupteur cadenassable, ...)",
+      "Obturation coupe-feu réalisée (photo si à faire par la suite)",
+      "Liaison(s) équipotentielle(s) effectuée(s) (si oui, les protocoler dans le PM)"
     ],
     // PDF labels
     pdfTitle:       "PREMIERES VERIFICATIONS PAR L'INSTALLATEUR ELECTRICIEN",
@@ -125,12 +125,16 @@ const I18N = {
     pdfGrpGroupe:   "Groupe",
     pdfGrpPartie:   "Partie d'inst.",
     pdfGrpCollab:   "Collaborateur",
-    pdfColHdr: ["N°", "Designation", "Type", "Nbre\nsect.", "Courbe", "I nom\n(A)", "Icc max\nL-PE", "Icc min\nL-PE", "Icc max\nL-N", "Icc min\nL-N", "R iso.\n(Mohm)", "Rlo\n(ohm)", "Design.\n/ type", "I nom.\n(A)", "Idelta\n(mA)", "Temps\n(ms)", "I decl.\n(mA)", "Champ\ntour.", "Chute\n%", "", ""],
+    pdfColHdr: ["N°", "Designation", "Type", "Nbre\nsect.", "Courbe", "I nom\n(A)", "Icc max\nL-PE", "Icc min\nL-PE", "Icc max\nL-N", "Icc min\nL-N", "R iso.\n(Mohm)", "Rlo\n(ohm)", "Design.\n/ type", "I nom.\n(A)", "Idelta\n(mA)", "Temps\n(ms)", "I decl.\n(mA)", "Champ\ntour.", "Regime\nneutre", "", ""],
     pdfVcLabels: [
-      "Protection de base des contacts directs","Identification coupe-surint., liste reference",
-      "Presence de schemas a jour","Dispositions et marquages conducteurs",
-      "Choix materiaux selon genre de local","Organe de coupure et declenchement",
-      "Presence de barrieres coupe-feu","Choix et reglage protections thermiques"
+      "Protection de base des contacts directs (IP2x)",
+      "Identification des coupe-surintensités",
+      "Présence des schémas, listing et schémas à jour",
+      "Dispositions et marquages des conducteurs (étiquetage, section, couleur, ...)",
+      "Choix des matériaux selon le genre de local (IP, CPR respecté)",
+      "Organe de coupure et de déclenchement (interrupteur cadenassable, ...)",
+      "Obturation coupe-feu réalisée (photo si à faire par la suite)",
+      "Liaison(s) équipotentielle(s) effectuée(s) (si oui, les protocoler dans le PM)"
     ],
     // V1.3.0 — remarques PdM 22.10.2026
     reqTitle: "Champs obligatoires manquants",
@@ -140,7 +144,7 @@ const I18N = {
     reqRisoFmt: "2 décimales, ex. 156,36",
     reqChooseList: "choisir dans la liste",
     reqNumber: "nombre attendu",
-    sublMes2: "Champ tournant / chute de tension",
+    sublMes2: "Champ tournant / régime de neutre",
     lblGires: "N° Gires",
     lblInstrAutres: "Autres appareils de mesure",
     phInstrAutre: "Autre appareil (saisie libre)...",
@@ -164,6 +168,8 @@ const I18N = {
     ddrDesigOpts: {"RCCB": "RCCB — interrupteur différentiel uniquement", "RCBO": "RCBO — disjoncteur et différentiel en 1 équipement", "PRCD": "PRCD — DDR mobile", "SRCD": "SRCD — prise DDR (SIDOS)", "CBR": "CBR — disjoncteur de puissance avec DDR", "AUCUN": "Aucun DDR"},
     ddrTypeOpts: {"A": "A — général", "EV/MI": "EV/MI — installation de recharge", "F": "F — appareils ménagers", "B": "B — convertisseur de fréquence, onduleur", "B+": "B+ — convertisseur de fréquence, onduleur (avec prot. contre les incendies)"},
     regimeOpts: {"TT rail CFF": "TT rail CFF"},
+    // V1.3.1
+    vcOpts: {"true": "Conforme", "false": "Non conforme", "NA": "N.A", "oui": "Oui", "non": "Non"},
     pdfFooter: "Protocole_mesures_1ere_verif_v3.xlsx"
   },
   de: {
@@ -256,14 +262,14 @@ const I18N = {
     lblSig:          "Unterschrift",
     sigPlaceholder:  "Tippen zum Unterschreiben...",
     vcLabels: [
-      "Basisschutz gegen direktes Berühren",
-      "Kennzeichnung der Überstromschutzgeräte, Referenzliste",
-      "Vorhandensein aktueller Schemen",
-      "Anordnung und Kennzeichnung der Leiter",
-      "Materialwahl nach Art des Raumes",
-      "Schalt- und Auslöseorgan",
-      "Vorhandensein von Brandschutzabschottungen",
-      "Auswahl und Einstellung des thermischen Schutzes"
+      "Basisschutz gegen direktes Berühren (IP2x)",
+      "Kennzeichnung der Überstromschutzgeräte",
+      "Vorhandensein der Schemen, Listing und aktuelle Schemen",
+      "Anordnung und Kennzeichnung der Leiter (Beschriftung, Querschnitt, Farbe, ...)",
+      "Materialwahl nach Art des Raumes (IP, CPR eingehalten)",
+      "Schalt- und Auslöseorgan (abschliessbarer Schalter, ...)",
+      "Brandschutzabschottung ausgeführt (Foto, falls später auszuführen)",
+      "Potentialausgleich(e) ausgeführt (falls ja, im Messprotokoll festhalten)"
     ],
     pdfTitle:       "ERSTPRUEFUNGEN DURCH DEN ELEKTROINSTALLATEUR",
     pdfNomInst:     "Name und Adresse der Anlage:",
@@ -292,12 +298,16 @@ const I18N = {
     pdfGrpGroupe:   "Gruppe",
     pdfGrpPartie:   "Anlagenteil",
     pdfGrpCollab:   "Mitarbeiter",
-    pdfColHdr: ["Nr.", "Bezeichnung", "Typ", "Anz.\nQuerschn.", "Kurve", "I nenn\n(A)", "Icc max\nL-PE", "Icc min\nL-PE", "Icc max\nL-N", "Icc min\nL-N", "R iso.\n(Mohm)", "Rlo\n(ohm)", "Bez.\n/ Typ", "I nenn\n(A)", "Idelta\n(mA)", "Zeit\n(ms)", "I ausl.\n(mA)", "Dreh-\nfeld", "Span.-\nabfall %", "", ""],
+    pdfColHdr: ["Nr.", "Bezeichnung", "Typ", "Anz.\nQuerschn.", "Kurve", "I nenn\n(A)", "Icc max\nL-PE", "Icc min\nL-PE", "Icc max\nL-N", "Icc min\nL-N", "R iso.\n(Mohm)", "Rlo\n(ohm)", "Bez.\n/ Typ", "I nenn\n(A)", "Idelta\n(mA)", "Zeit\n(ms)", "I ausl.\n(mA)", "Dreh-\nfeld", "Netz-\nsystem", "", ""],
     pdfVcLabels: [
-      "Basisschutz gegen direktes Beruehren","Kennzeichnung Ueberstromschutz, Referenzliste",
-      "Vorhandensein aktueller Schemen","Anordnung und Kennzeichnung der Leiter",
-      "Materialwahl nach Art des Raumes","Schalt- und Ausloesesorgan",
-      "Vorhandensein Brandschutzabschottungen","Auswahl und Einstellung thermischer Schutz"
+      "Basisschutz gegen direktes Berühren (IP2x)",
+      "Kennzeichnung der Überstromschutzgeräte",
+      "Vorhandensein der Schemen, Listing und aktuelle Schemen",
+      "Anordnung und Kennzeichnung der Leiter (Beschriftung, Querschnitt, Farbe, ...)",
+      "Materialwahl nach Art des Raumes (IP, CPR eingehalten)",
+      "Schalt- und Auslöseorgan (abschliessbarer Schalter, ...)",
+      "Brandschutzabschottung ausgeführt (Foto, falls später auszuführen)",
+      "Potentialausgleich(e) ausgeführt (falls ja, im Messprotokoll festhalten)"
     ],
     // V1.3.0 — remarques PdM 22.10.2026
     reqTitle: "Fehlende Pflichtfelder",
@@ -307,7 +317,7 @@ const I18N = {
     reqRisoFmt: "2 Dezimalstellen, z.B. 156,36",
     reqChooseList: "aus der Liste wählen",
     reqNumber: "Zahl erwartet",
-    sublMes2: "Drehfeld / Spannungsabfall",
+    sublMes2: "Drehfeld / Netzsystem",
     lblGires: "Gires-Nr.",
     lblInstrAutres: "Weitere Messgeräte",
     phInstrAutre: "Weiteres Messgerät (freie Eingabe)...",
@@ -331,6 +341,8 @@ const I18N = {
     ddrDesigOpts: {"RCCB": "RCCB — nur FI-Schalter", "RCBO": "RCBO — FI/LS-Kombination in 1 Gerät", "PRCD": "PRCD — ortsveränderlicher FI", "SRCD": "SRCD — FI-Steckdose (SIDOS)", "CBR": "CBR — Leistungsschalter mit FI", "AUCUN": "Kein FI"},
     ddrTypeOpts: {"A": "A — allgemein", "EV/MI": "EV/MI — Ladeinstallation", "F": "F — Haushaltgeräte", "B": "B — Frequenzumrichter, Wechselrichter", "B+": "B+ — Frequenzumrichter, Wechselrichter (mit Brandschutz)"},
     regimeOpts: {"TT rail CFF": "TT rail SBB"},
+    // V1.3.1
+    vcOpts: {"true": "Konform", "false": "Nicht konform", "NA": "N.A", "oui": "Ja", "non": "Nein"},
     pdfFooter: "Protokoll_Erstpruefungen_v3.xlsx"
   },
   it: {
@@ -428,14 +440,14 @@ const I18N = {
     lblSig:          "Firma",
     sigPlaceholder:  "Tocca per firmare...",
     vcLabels: [
-      "Protezione di base dei contatti diretti",
-      "Identificazione dei dispositivi di protezione, lista di riferimento",
-      "Presenza di schemi aggiornati",
-      "Disposizioni e marcature dei conduttori",
-      "Scelta dei materiali secondo il tipo di locale",
-      "Organo di sezionamento e sgancio",
-      "Presenza di barriere tagliafuoco",
-      "Scelta e regolazione delle protezioni (termica)"
+      "Protezione di base dei contatti diretti (IP2x)",
+      "Identificazione dei dispositivi di protezione contro le sovracorrenti",
+      "Presenza degli schemi, listing e schemi aggiornati",
+      "Disposizioni e marcature dei conduttori (etichettatura, sezione, colore, ...)",
+      "Scelta dei materiali secondo il tipo di locale (IP, CPR rispettato)",
+      "Organo di sezionamento e sgancio (interruttore lucchettabile, ...)",
+      "Otturazione tagliafuoco eseguita (foto se da eseguire in seguito)",
+      "Collegamento/i equipotenziale/i eseguito/i (se sì, registrarli nel protocollo di misura)"
     ],
     pdfTitle:       "PRIME VERIFICHE DA PARTE DELL'INSTALLATORE ELETTRICO",
     pdfNomInst:     "Nome e indirizzo dell'impianto:",
@@ -464,12 +476,16 @@ const I18N = {
     pdfGrpGroupe:   "Gruppo",
     pdfGrpPartie:   "Parte impianto",
     pdfGrpCollab:   "Collaboratore",
-    pdfColHdr: ["N.", "Designazione", "Tipo", "N.x\nsezione", "Curva", "I nom\n(A)", "Icc max\nL-PE", "Icc min\nL-PE", "Icc max\nL-N", "Icc min\nL-N", "R iso.\n(Mohm)", "Rlo\n(ohm)", "Design.\n/ tipo", "I nom.\n(A)", "Idelta\n(mA)", "Tempo\n(ms)", "I sgan.\n(mA)", "Campo\nrot.", "Caduta\n%", "", ""],
+    pdfColHdr: ["N.", "Designazione", "Tipo", "N.x\nsezione", "Curva", "I nom\n(A)", "Icc max\nL-PE", "Icc min\nL-PE", "Icc max\nL-N", "Icc min\nL-N", "R iso.\n(Mohm)", "Rlo\n(ohm)", "Design.\n/ tipo", "I nom.\n(A)", "Idelta\n(mA)", "Tempo\n(ms)", "I sgan.\n(mA)", "Campo\nrot.", "Sist.\nneutro", "", ""],
     pdfVcLabels: [
-      "Protezione di base contatti diretti","Identificazione dispositivi protezione, lista rif.",
-      "Presenza schemi aggiornati","Disposizioni e marcature conduttori",
-      "Scelta materiali secondo tipo locale","Organo di sezionamento e sgancio",
-      "Presenza barriere tagliafuoco","Scelta e regolazione protezioni termiche"
+      "Protezione di base dei contatti diretti (IP2x)",
+      "Identificazione dei dispositivi di protezione contro le sovracorrenti",
+      "Presenza degli schemi, listing e schemi aggiornati",
+      "Disposizioni e marcature dei conduttori (etichettatura, sezione, colore, ...)",
+      "Scelta dei materiali secondo il tipo di locale (IP, CPR rispettato)",
+      "Organo di sezionamento e sgancio (interruttore lucchettabile, ...)",
+      "Otturazione tagliafuoco eseguita (foto se da eseguire in seguito)",
+      "Collegamento/i equipotenziale/i eseguito/i (se sì, registrarli nel protocollo di misura)"
     ],
     // V1.3.0 — remarques PdM 22.10.2026
     reqTitle: "Campi obbligatori mancanti",
@@ -479,7 +495,7 @@ const I18N = {
     reqRisoFmt: "2 decimali, es. 156,36",
     reqChooseList: "scegliere dalla lista",
     reqNumber: "numero atteso",
-    sublMes2: "Campo rotante / caduta di tensione",
+    sublMes2: "Campo rotante / sistema di neutro",
     lblGires: "N° Gires",
     lblInstrAutres: "Altri strumenti di misura",
     phInstrAutre: "Altro strumento (testo libero)...",
@@ -503,6 +519,8 @@ const I18N = {
     ddrDesigOpts: {"RCCB": "RCCB — solo interruttore differenziale", "RCBO": "RCBO — interruttore magnetotermico differenziale", "PRCD": "PRCD — differenziale mobile", "SRCD": "SRCD — presa con differenziale (SIDOS)", "CBR": "CBR — interruttore di potenza con differenziale", "AUCUN": "Nessun DDR"},
     ddrTypeOpts: {"A": "A — generale", "EV/MI": "EV/MI — impianto di ricarica", "F": "F — elettrodomestici", "B": "B — convertitore di frequenza, inverter", "B+": "B+ — convertitore di frequenza, inverter (con protezione antincendio)"},
     regimeOpts: {"TT rail CFF": "TT rail FFS"},
+    // V1.3.1
+    vcOpts: {"true": "Conforme", "false": "Non conforme", "NA": "N.A", "oui": "Sì", "non": "No"},
     pdfFooter: "Protocollo_prime_verifiche_v3.xlsx"
   }
 };

@@ -69,7 +69,7 @@ async function buildPDFBlob(){
   ['nom_installation','num_tableau','page','objet','num_compteur','fournisseur','remarques_install','cc_general','cc_abonne','tension','instrument','num_inventaire','facteur_icc','valeur_facteur','nom_prenom','lieu','date_sig','remarques','num_gires','regime_neutre','instrument2','instrument3'].forEach(k=>D[k]=gv(k));
   D.vc={};for(let i=1;i<=8;i++)D.vc['vc'+i]=gv('vc'+i);
   D.circuits=circuitIds.filter(id=>!!$('cc-'+id)).map(id=>({groupe:gv('groupe_'+id),desig:gv('desig_'+id),ctype:gv('ctype_'+id),csect:gv('csect_'+id),courbe:gv('courbe_'+id),inom:gv('inom_'+id),icc_max_lpe:gv('icc_max_lpe_'+id),icc_min_lpe:gv('icc_min_lpe_'+id),icc_max_ln:gv('icc_max_ln_'+id),icc_min_ln:gv('icc_min_ln_'+id),riso:gv('riso_'+id),rlo:gv('rlo_'+id),ddr_inom:gv('ddr_inom_'+id),ddr_idelta:gv('ddr_idelta_'+id),ddr_temps:gv('ddr_temps_'+id),champ:gv('champ_'+id),chute:gv('chute_'+id),rem:gv('rem_'+id),
-    ddr_desig:gv('ddr_desig_'+id),ddr_type:gv('ddr_type_'+id),ddr_idecl:gv('ddr_idecl_'+id),
+    ddr_desig:gv('ddr_desig_'+id),regime:gv('regime_'+id),ddr_type:gv('ddr_type_'+id),ddr_idecl:gv('ddr_idecl_'+id),
     collab_nom:(($('collab_signed_'+id)&&$('collab_signed_'+id).checked)?gv('nom_prenom'):(gv('collab_nom_'+id)||'')),
     collab_sig:(($('collab_signed_'+id)&&$('collab_signed_'+id).checked)?(sigData||''):(gv('collab_sig_'+id)||'')),
     uid:(($('cc-'+id)||{}).dataset||{}).uid||''
@@ -118,7 +118,7 @@ async function buildPDFBlob(){
 
   // 3. TABLEAU
   const BZH=57*MM,TBOT=6*MM+BZH,TTOP=IY-IH,TH=TTOP-TBOT,TW=W-ML-MR;
-  const rawCW=[7,22,14,9,8,8,10,10,10,10,9,8,11,8,8,8,8,9,8,16,18];
+  const rawCW=[7,22,14,9,8,8,10,10,10,10,9,8,11,8,8,8,8,9,12,15,17];
   const sumCW=rawCW.reduce((a,b)=>a+b,0);
   const CW=rawCW.map(x=>(x/sumCW)*TW);
   const colX=ci=>{let x=ML;for(let i=0;i<ci;i++)x+=CW[i];return x;};
@@ -139,11 +139,13 @@ async function buildPDFBlob(){
     const ry=dataRowY(i), ytxt=ry+HRD*0.28;
     const ddrTxt=circ.ddr_desig==='AUCUN'?'-':[circ.ddr_desig||'',circ.ddr_type||''].filter(Boolean).join(' ');
     const champTxt=(T.champShort&&T.champShort[circ.champ])||circ.champ||'';
-    const cols=[circ.groupe||'',circ.desig||'',circ.ctype||'',circ.csect||'',circ.courbe||'',circ.inom||'',circ.icc_max_lpe||'',circ.icc_min_lpe||'',circ.icc_max_ln||'',circ.icc_min_ln||'',circ.riso||'',circ.rlo||'',ddrTxt,circ.ddr_inom||'',circ.ddr_idelta||'',circ.ddr_temps||'',circ.ddr_idecl||'',champTxt,circ.chute||'',circ.rem||''];
+    const reg=circ.regime||(i<D.circuits.length?D.regime_neutre:'')||'';   // V1.3.1 : par circuit (repli : régime commun V1.3.0)
+    const regTxt=(T.regimeOpts&&T.regimeOpts[reg])||reg;
+    const cols=[circ.groupe||'',circ.desig||'',circ.ctype||'',circ.csect||'',circ.courbe||'',circ.inom||'',circ.icc_max_lpe||'',circ.icc_min_lpe||'',circ.icc_max_ln||'',circ.icc_min_ln||'',circ.riso||'',circ.rlo||'',ddrTxt,circ.ddr_inom||'',circ.ddr_idelta||'',circ.ddr_temps||'',circ.ddr_idecl||'',champTxt,regTxt,circ.rem||''];
     cols.forEach((val,ci)=>{
       const x=colX(ci),w=CW[ci];let col=BLACK,f=fR,sz=5.8;
       if(val==='OK'){col=GREEN;f=fB;}if(val==='NOK'){col=REDD;f=fB;}
-      if(ci===2||ci===12)sz=5.2;
+      if(ci===2||ci===12||ci===18)sz=5.2;
       const s=clip(val,w-2,sz,f);
       (ci===1||ci===19)?Txt(s,x+1.5,ytxt,sz,f,col):TxtC(s,x,w,ytxt,sz,f,col);
     });
@@ -232,14 +234,16 @@ async function buildPDFBlob(){
     const vy=BY+BH-5.5*MM-(i+1)*vcRH;
     if(i%2===0)R(X1,vy,C1W,vcRH,LG2);
     L(X1,vy+vcRH,X1+C1W,vy+vcRH,MGRAY,.25);
-    Txt(clip(lbl,C1W-16*MM,5.3,fR),X1+2*MM,vy+vcRH*.35,5.3,fR,BLACK);
-    const ok=D.vc['vc'+(i+1)];
-    TxtR(ok?'OK':'NOK',X1+C1W-2*MM,vy+vcRH*.35,6,fB,ok?GREEN:REDD);
+    const mxL=C1W-14*MM,sl=san(lbl);let lsz=5.3;while(lsz>4.3&&fR.widthOfTextAtSize(sl,lsz)>mxL)lsz-=.1;
+    Txt(clip(lbl,mxL,lsz,fR),X1+2*MM,vy+vcRH*.35,lsz,fR,BLACK);
+    const st=D.vc['vc'+(i+1)];
+    if(st==='NA')TxtR('N.A',X1+C1W-2*MM,vy+vcRH*.35,6,fB,DGRAY);
+    else TxtR(st?'OK':'NOK',X1+C1W-2*MM,vy+vcRH*.35,6,fB,st?GREEN:REDD);
   });
 
   colBox(X2,C2W,T.pdfParamsTitle);
   const autres=[D.instrument2,D.instrument3].filter(Boolean).join(' / ');
-  const params=[[T.pdfFacteur,(D.facteur_icc||'NON')+"  val: "+(D.valeur_facteur||'1')],[T.pdfTension,D.tension||'240V'],[T.pdfRegime||'Regime de neutre:',D.regime_neutre?((T.regimeOpts&&T.regimeOpts[D.regime_neutre])||D.regime_neutre):''],[T.pdfInstrument,D.instrument||''],[T.pdfInventaire,D.num_inventaire||'']];
+  const params=[[T.pdfFacteur,D.valeur_facteur||''],[T.pdfTension,D.tension||'240V'],[T.pdfInstrument,D.instrument||''],[T.pdfInventaire,D.num_inventaire||'']];
   if(autres)params.push([T.pdfAutresInstr||'Autres appareils:',autres]);
   const lh=4.6*MM;
   params.forEach(([k,v],i)=>{const py=BY+BH-5.5*MM-(i+1)*lh;if(i%2===0)R(X2,py,C2W,lh,LGRAY);Txt(k,X2+2*MM,py+lh*.35,5.3,fB,DGRAY);Txt(clip(v,C2W*.6,5.3,fR),X2+C2W*.37,py+lh*.35,5.3,fR,BLACK);});
