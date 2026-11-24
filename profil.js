@@ -35,7 +35,7 @@
       resend: '✉️ Renvoyer l’e-mail d’inscription', copyCode: 'Copier le bloc d’inscription', copied: 'Bloc copié ✓',
       infos: 'Informations personnelles', nom: 'Nom', prenom: 'Prénom', email: 'E-mail',
       devices: 'Appareils de mesure', instrument: 'Instrument', inventaire: 'N° d’inventaire', addDevice: '+ Ajouter un appareil',
-      devicesHint: 'Proposés dans une liste déroulante au champ « Instrument » des paramètres de mesure.',
+      devicesHint: 'Proposés dans les listes déroulantes « Instrument » et « Autres appareils de mesure » du protocole : vous pouvez en sélectionner plusieurs.',
       mySig: 'Ma signature', drawSig: '✍️ Dessiner ma signature', redrawSig: '✍️ Modifier ma signature', noSig: 'Aucune signature',
       sigHint: 'Reprise dans le champ « Signature » du protocole et dans les signatures électroniques (bas de page et lignes).',
       padTitle: 'Ma signature', padHint: 'Signez dans le cadre', clear: 'Effacer', ok: 'Valider', cancel: 'Annuler', drawFirst: 'Signez d’abord dans le cadre.',
@@ -95,7 +95,7 @@
       resend: '✉️ Registrierungs-E-Mail erneut senden', copyCode: 'Registrierungsblock kopieren', copied: 'Block kopiert ✓',
       infos: 'Persönliche Angaben', nom: 'Name', prenom: 'Vorname', email: 'E-Mail',
       devices: 'Messgeräte', instrument: 'Messgerät', inventaire: 'Inventar-Nr.', addDevice: '+ Messgerät hinzufügen',
-      devicesHint: 'Werden im Feld «Messgerät» der Messparameter als Auswahlliste angeboten.',
+      devicesHint: 'Werden in den Auswahllisten «Messgerät» und «Weitere Messgeräte» des Protokolls angeboten: mehrere können ausgewählt werden.',
       mySig: 'Meine Unterschrift', drawSig: '✍️ Unterschrift zeichnen', redrawSig: '✍️ Unterschrift ändern', noSig: 'Keine Unterschrift',
       sigHint: 'Wird im Feld «Unterschrift» und in den elektronischen Unterschriften (unten und pro Zeile) verwendet.',
       padTitle: 'Meine Unterschrift', padHint: 'Im Rahmen unterschreiben', clear: 'Löschen', ok: 'Bestätigen', cancel: 'Abbrechen', drawFirst: 'Bitte zuerst im Rahmen unterschreiben.',
@@ -155,7 +155,7 @@
       resend: '✉️ Reinviare l’e-mail di iscrizione', copyCode: 'Copiare il blocco di iscrizione', copied: 'Blocco copiato ✓',
       infos: 'Dati personali', nom: 'Cognome', prenom: 'Nome', email: 'E-mail',
       devices: 'Strumenti di misura', instrument: 'Strumento', inventaire: 'N° inventario', addDevice: '+ Aggiungere uno strumento',
-      devicesHint: 'Proposti in un elenco a discesa nel campo «Strumento» dei parametri di misura.',
+      devicesHint: 'Proposti negli elenchi «Strumento» e «Altri strumenti di misura» del protocollo: se ne possono selezionare diversi.',
       mySig: 'La mia firma', drawSig: '✍️ Disegnare la firma', redrawSig: '✍️ Modificare la firma', noSig: 'Nessuna firma',
       sigHint: 'Ripresa nel campo «Firma» e nelle firme elettroniche (in basso e per riga).',
       padTitle: 'La mia firma', padHint: 'Firmare nel riquadro', clear: 'Cancellare', ok: 'Confermare', cancel: 'Annullare', drawFirst: 'Firmare prima nel riquadro.',
@@ -264,6 +264,7 @@ const fmtDay = d => d ? d.split('-').reverse().join('.') : '';
   /* ------------------------------------- LISTE DÉROULANTE « INSTRUMENT » */
   let instrObserver = null;
   function buildInstrumentSelect() {
+    buildExtraSelect('instrument2'); buildExtraSelect('instrument3');
     const inp = $('instrument'), inv = $('num_inventaire');
     if (!inp) return;
     let sel = $('instrument-select');
@@ -293,6 +294,40 @@ const fmtDay = d => d ? d.split('-').reverse().join('.') : '';
     html += `<option value="other">${t('other')}</option>`;
     sel.innerHTML = html;
     sel.value = idx >= 0 ? String(idx) : (curI ? 'current' : 'other');
+    inp.style.display = sel.value === 'other' ? '' : 'none';
+    sel.disabled = inp.readOnly || inp.disabled;
+  }
+
+  /* ------------------- V1.3.0 : APPAREILS SUPPLÉMENTAIRES (instrument2, instrument3)
+   * Même liste que « Instrument » (appareils du profil) + « — aucun — » + « Autre… ».
+   * La valeur enregistrée est le texte « Instrument – N° d'inventaire ». */
+  const devText = d => (d.instrument || '') + (d.inventaire ? ' – ' + d.inventaire : '');
+  const NONE = { fr: '— aucun —', de: '— keines —', it: '— nessuno —' };
+  function buildExtraSelect(id) {
+    const inp = $(id); if (!inp) return;
+    let sel = $(id + '-select');
+    if (!sel) {
+      sel = document.createElement('select');
+      sel.id = id + '-select';
+      inp.parentNode.insertBefore(sel, inp);
+      sel.addEventListener('change', () => {
+        const v = sel.value;
+        if (v === 'current') return;
+        if (v === 'other') { inp.style.display = ''; inp.value = ''; inp.focus(); }
+        else { inp.value = v === '' ? '' : devText(devices()[+v] || {}); inp.style.display = 'none'; }
+        inp.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      new MutationObserver(() => { sel.disabled = inp.readOnly || inp.disabled; })
+        .observe(inp, { attributes: true, attributeFilter: ['readonly', 'disabled'] });
+    }
+    const devs = devices(), cur = inp.value || '';
+    const idx = devs.findIndex(d => devText(d) === cur || (d.instrument === cur && !d.inventaire));
+    let html = `<option value="">${NONE[currentLang] || NONE.fr}</option>`;
+    if (idx < 0 && cur) html += `<option value="current">${esc(cur)} (${t('current')})</option>`;
+    html += devs.map((d, i) => `<option value="${i}">${esc(devText(d) || '—')}</option>`).join('');
+    html += `<option value="other">${t('other')}</option>`;
+    sel.innerHTML = html;
+    sel.value = idx >= 0 ? String(idx) : (cur ? 'current' : '');
     inp.style.display = sel.value === 'other' ? '' : 'none';
     sel.disabled = inp.readOnly || inp.disabled;
   }

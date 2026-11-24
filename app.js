@@ -46,6 +46,10 @@ function applyLang() {
   st('lbl-nom-prenom', T.lblNomPrenom);
   st('lbl-lieu', T.lblLieu);
   st('lbl-date', T.lblDate);
+  st('lbl-gires', T.lblGires);
+  st('lbl-regime', T.lblRegime);
+  st('lbl-instr-autres', T.lblInstrAutres);
+  translateLists();
 
   T.vcLabels.forEach((lbl, i) => st('vc-lbl-'+(i+1), lbl));
   st('lbl-sig', T.lblSig||'Signature');
@@ -106,17 +110,16 @@ function addCircuit(data){
     <div class="mg">
       <div class="mf">
         <div style="display:flex;align-items:center;gap:5px;margin-bottom:2px;">
-          <label data-lbl="lblCtype" style="font-size:9.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.2px;margin:0;">${T.lblCtype}</label>
+          <label data-lbl="lblCtype" class="req" style="font-size:9.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.2px;margin:0;">${T.lblCtype}</label>
           <button type="button" onclick="showCableHelp()" style="width:16px;height:16px;border-radius:50%;border:1.5px solid var(--navy);background:var(--navy);color:#fff;font-size:9px;font-weight:700;cursor:pointer;line-height:1;padding:0;flex-shrink:0;" title="Aide">i</button>
         </div>
-        <input type="text" id="ctype_${id}" value="${(data&&data.ctype)||''}" placeholder="NYM" list="ctype-list" autocomplete="off"/>
-        <datalist id="ctype-list"><option value="H07V-U"/><option value="CH-N1VV-U"/><option value="H05VV-F"/><option value="CH-N1VV-K"/><option value="H07BQ-F"/><option value="CH-N1VCV-U"/></datalist>
+        ${comboHTML('ctype_'+id,'ctype',(data&&data.ctype)||'')}
       </div>
       <div class="mf"><label data-lbl="lblCsect">${T.lblCsect}</label><input type="text" id="csect_${id}" value="${(data&&data.csect)||''}" placeholder="3×2.5 mm²"/></div>
     </div>
     <span class="sub-lbl" data-lbl="sublCoupe">${T.sublCoupe}</span>
     <div class="mg">
-      <div class="mf"><label data-lbl="lblCourbe">${T.lblCourbe}</label><input type="text" id="courbe_${id}" value="${(data&&data.courbe)||''}" placeholder="B/C/D..." list="courbe-list-${id}" autocomplete="off"/><datalist id="courbe-list-${id}"><option value="B"/><option value="C"/><option value="D"/><option value="K"/><option value="Z"/></datalist></div>
+      <div class="mf"><label data-lbl="lblCourbe" class="req">${T.lblCourbe}</label>${comboHTML('courbe_'+id,'courbe',(data&&data.courbe)||'')}</div>
       <div class="mf"><label data-lbl="lblInom">${T.lblInom}</label><input type="text" id="inom_${id}" value="${(data&&data.inom)||''}" placeholder="16" list="inom-list-${id}" autocomplete="off"/><datalist id="inom-list-${id}"><option value="2 A"/><option value="4 A"/><option value="6 A"/><option value="10 A"/><option value="13 A"/><option value="16 A"/><option value="20 A"/><option value="25 A"/><option value="32 A"/><option value="40 A"/><option value="50 A"/><option value="63 A"/><option value="80 A"/><option value="100 A"/><option value="125 A"/></datalist></div>
     </div>
     <span class="sub-lbl" data-lbl="sublIcc">${T.sublIcc}</span>
@@ -125,21 +128,26 @@ function addCircuit(data){
       <div class="mf"><label data-lbl="lblIccMinLpe">${T.lblIccMinLpe}</label><input type="number" id="icc_min_lpe_${id}" value="${(data&&data.icc_min_lpe)||''}"/></div>
       <div class="mf"><label data-lbl="lblIccMaxLn">${T.lblIccMaxLn}</label><input type="number" id="icc_max_ln_${id}" value="${(data&&data.icc_max_ln)||''}"/></div>
       <div class="mf"><label data-lbl="lblIccMinLn">${T.lblIccMinLn}</label><input type="number" id="icc_min_ln_${id}" value="${(data&&data.icc_min_ln)||''}"/></div>
-      <div class="mf"><label data-lbl="lblRiso">${T.lblRiso}</label><input type="text" inputmode="decimal" id="riso_${id}" value="${(data&&data.riso)||''}" placeholder="ex: >1"/></div>
+      <div class="mf"><label data-lbl="lblRiso" class="req">${T.lblRiso}</label><input type="text" inputmode="decimal" id="riso_${id}" value="${(data&&data.riso)||''}" placeholder="ex: 156,36"/></div>
       <div class="mf"><label data-lbl="lblRlo">${T.lblRlo}</label><input type="text" inputmode="decimal" id="rlo_${id}" value="${(data&&data.rlo)||''}" placeholder="ex: <1"/></div>
     </div>
     <span class="sub-lbl" data-lbl="sublDdr">${T.sublDdr}</span>
     <div class="mg">
+      <div class="mf"><label data-lbl="lblDdrDesig" class="req">${T.lblDdrDesig}</label>${selectHTML('ddr_desig_'+id,'ddrDesig',(data&&data.ddr_desig)||'')}</div>
+      <div class="mf"><label data-lbl="lblDdrType" class="req">${T.lblDdrType}</label>${comboHTML('ddr_type_'+id,'ddrType',(data&&data.ddr_type)||'')}</div>
       <div class="mf"><label data-lbl="lblDdrInom">${T.lblDdrInom}</label><input type="number" id="ddr_inom_${id}" value="${(data&&data.ddr_inom)||''}"/></div>
-      <div class="mf"><label data-lbl="lblDdrIdelta">${T.lblDdrIdelta}</label><input type="text" id="ddr_idelta_${id}" value="${(data&&data.ddr_idelta)||''}" placeholder="mA" list="idelta-list-${id}" autocomplete="off"/><datalist id="idelta-list-${id}"><option value="10 mA"/><option value="15 mA"/><option value="30 mA"/><option value="300 mA"/></datalist></div>
+      <div class="mf"><label data-lbl="lblDdrIdelta" class="req">${T.lblDdrIdelta}</label>${selectHTML('ddr_idelta_'+id,'idelta',(data&&data.ddr_idelta)||'')}</div>
       <div class="mf"><label data-lbl="lblDdrTemps">${T.lblDdrTemps}</label><input type="number" id="ddr_temps_${id}" value="${(data&&data.ddr_temps)||''}"/></div>
-      <div class="mf"><label data-lbl="lblChamp">${T.lblChamp}</label><select id="champ_${id}"><option value="">—</option><option>OK</option><option>NOK</option><option>N/A</option></select></div>
+      <div class="mf"><label data-lbl="lblDdrIdecl" class="req">${T.lblDdrIdecl}</label><input type="text" inputmode="decimal" id="ddr_idecl_${id}" value="${(data&&data.ddr_idecl)||''}" placeholder="mA"/></div>
+    </div>
+    <span class="sub-lbl" data-lbl="sublMes2">${T.sublMes2||T.pdfGrpMes}</span>
+    <div class="mg">
+      <div class="mf"><label data-lbl="lblChamp" class="req">${T.lblChamp}</label>${selectHTML('champ_'+id,'champ',(data&&data.champ)||'')}</div>
       <div class="mf"><label data-lbl="lblChute">${T.lblChute}</label><input type="number" step="0.1" id="chute_${id}" value="${(data&&data.chute)||''}"/></div>
     </div>
     <span class="sub-lbl" data-lbl="sublRem">${T.sublRem||'Remarque'}</span>
     <textarea id="rem_${id}" rows="2" placeholder="${T.lblRemCircuit||'Remarque sur ce circuit...'}" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;background:#fff;color:var(--text);width:100%;outline:none;resize:vertical;min-height:48px;">${(data&&data.rem)||''}</textarea>`;
   box.appendChild(d);
-  if(data){if(data.courbe)$('courbe_'+id).value=data.courbe;if(data.ddr_idelta)$('ddr_idelta_'+id).value=data.ddr_idelta;if(data.champ)$('champ_'+id).value=data.champ;}
   updateBadge();
 }
 function removeCircuit(id){
@@ -169,12 +177,28 @@ function updateBadge(){$('cct').textContent=circuitIds.length;}
 // ═══════════════════════════════════════════════════════════
 // SAVE / LOAD
 // ═══════════════════════════════════════════════════════════
-const FIELDS=['nom_installation','num_tableau','page','objet','num_compteur','cc_general','cc_abonne','fournisseur','remarques_install','tension','instrument','num_inventaire','facteur_icc','valeur_facteur','vc1','vc2','vc3','vc4','vc5','vc6','vc7','vc8','remarques','nom_prenom','lieu','date_sig'];
+const FIELDS=['nom_installation','num_tableau','page','objet','num_compteur','cc_general','cc_abonne','fournisseur','remarques_install','tension','instrument','num_inventaire','facteur_icc','valeur_facteur','vc1','vc2','vc3','vc4','vc5','vc6','vc7','vc8','remarques','nom_prenom','lieu','date_sig','num_gires','regime_neutre','instrument2','instrument3'];
+// Champs ajoutés en V1.3.0 : écrits seulement s'ils sont remplis, pour que l'empreinte
+// des protocoles signés avec une version antérieure reste identique.
+const NEW_COMMON=['num_gires','regime_neutre','instrument2','instrument3'];
+const NEW_CIRCUIT=['ddr_desig','ddr_type','ddr_idecl'];
+function commonData(d){FIELDS.forEach(f=>d[f]=gv(f));NEW_COMMON.forEach(f=>{if(d[f]==='')delete d[f];});return d;}
+function circuitData(id){
+  const c={groupe:gv('groupe_'+id),desig:gv('desig_'+id),ctype:gv('ctype_'+id),csect:gv('csect_'+id),
+    courbe:gv('courbe_'+id),inom:gv('inom_'+id),
+    icc_max_lpe:gv('icc_max_lpe_'+id),icc_min_lpe:gv('icc_min_lpe_'+id),
+    icc_max_ln:gv('icc_max_ln_'+id),icc_min_ln:gv('icc_min_ln_'+id),
+    riso:gv('riso_'+id),rlo:gv('rlo_'+id),
+    ddr_inom:gv('ddr_inom_'+id),ddr_idelta:gv('ddr_idelta_'+id),
+    ddr_temps:gv('ddr_temps_'+id),champ:gv('champ_'+id),chute:gv('chute_'+id),
+    rem:gv('rem_'+id)};
+  NEW_CIRCUIT.forEach(k=>{const v=gv(k+'_'+id);if(v!=='')c[k]=v;});
+  return c;
+}
 function saveData(){
-  const d={lang:currentLang};
-  FIELDS.forEach(f=>d[f]=gv(f));
+  const d=commonData({lang:currentLang});
   d.sigData=sigData;
-  d.circuits=circuitIds.filter(id=>!!$('cc-'+id)).map(id=>({groupe:gv('groupe_'+id),desig:gv('desig_'+id),ctype:gv('ctype_'+id),csect:gv('csect_'+id),courbe:gv('courbe_'+id),inom:gv('inom_'+id),icc_max_lpe:gv('icc_max_lpe_'+id),icc_min_lpe:gv('icc_min_lpe_'+id),icc_max_ln:gv('icc_max_ln_'+id),icc_min_ln:gv('icc_min_ln_'+id),riso:gv('riso_'+id),rlo:gv('rlo_'+id),ddr_inom:gv('ddr_inom_'+id),ddr_idelta:gv('ddr_idelta_'+id),ddr_temps:gv('ddr_temps_'+id),champ:gv('champ_'+id),chute:gv('chute_'+id),rem:gv('rem_'+id)}));
+  d.circuits=circuitIds.filter(id=>!!$('cc-'+id)).map(circuitData);
   d.sigData=sigData;
   try{localStorage.setItem(SKEY,JSON.stringify(d));markSaved();}catch(e){showToast('Erreur sauvegarde');}
 }
@@ -187,7 +211,7 @@ function loadData(){
       document.querySelectorAll('.lang-btn').forEach(b=>{b.classList.remove('active');if(b.textContent===d.lang.toUpperCase())b.classList.add('active');});
       applyLang();
     }
-    FIELDS.forEach(f=>sv(f,d[f]));
+    FIELDS.forEach(f=>setField(f,d[f]));
     if(d.circuits&&d.circuits.length)d.circuits.forEach(c=>addCircuit(c));
     if(d.sigData){sigData=d.sigData;const prev=$('sig-preview');const ctx=prev.getContext('2d');prev.width=prev.offsetWidth*window.devicePixelRatio;prev.height=prev.offsetHeight*window.devicePixelRatio;ctx.scale(window.devicePixelRatio,window.devicePixelRatio);const img=new Image();img.onload=()=>{ctx.drawImage(img,0,0,prev.offsetWidth,prev.offsetHeight);};img.src=sigData;$('sig-placeholder').style.display='none';$('sig-clear-btn').style.display='block';}
     markSaved();showToast(I18N[currentLang].restored);
@@ -199,19 +223,9 @@ function clearData(){if(!confirm(I18N[currentLang].confirmClear))return;localSto
 // EXPORT / IMPORT
 // ═══════════════════════════════════════════════════════════
 function collectAll(){
-  const d={lang:currentLang, _version:1, _app:'SBB_Protocole'};
-  FIELDS.forEach(f=>d[f]=gv(f));
+  const d=commonData({lang:currentLang, _version:1, _app:'SBB_Protocole'});
   d.sigData=sigData;
-  d.circuits=circuitIds.filter(id=>!!$('cc-'+id)).map(id=>({
-    groupe:gv('groupe_'+id),desig:gv('desig_'+id),ctype:gv('ctype_'+id),csect:gv('csect_'+id),
-    courbe:gv('courbe_'+id),inom:gv('inom_'+id),
-    icc_max_lpe:gv('icc_max_lpe_'+id),icc_min_lpe:gv('icc_min_lpe_'+id),
-    icc_max_ln:gv('icc_max_ln_'+id),icc_min_ln:gv('icc_min_ln_'+id),
-    riso:gv('riso_'+id),rlo:gv('rlo_'+id),
-    ddr_inom:gv('ddr_inom_'+id),ddr_idelta:gv('ddr_idelta_'+id),
-    ddr_temps:gv('ddr_temps_'+id),champ:gv('champ_'+id),chute:gv('chute_'+id),
-    rem:gv('rem_'+id)
-  }));
+  d.circuits=circuitIds.filter(id=>!!$('cc-'+id)).map(circuitData);
   return d;
 }
 
@@ -305,7 +319,7 @@ function doImport(mode){
       document.querySelectorAll('.lang-btn').forEach(b=>{b.classList.remove('active');if(b.textContent===d.lang.toUpperCase())b.classList.add('active');});
       applyLang();
     }
-    FIELDS.forEach(f=>sv(f,d[f]));
+    FIELDS.forEach(f=>setField(f,d[f]));
     if(d.circuits&&d.circuits.length) d.circuits.forEach(c=>addCircuit(c));
     if(d.sigData){ sigData=d.sigData; }
     localStorage.setItem(SKEY,JSON.stringify(d));
@@ -337,6 +351,7 @@ async function generatePDF(){
 
 let _shareMode=null,_shareFilename=null,_sharePdfBlob=null;
 function openShareModal(mode){
+  if(mode==='pdf' && !checkRequired()) { saveData(); return; }
   saveData();
   _shareMode = mode;
   _sharePdfBlob = null;
@@ -445,4 +460,170 @@ async function shareAction(action){
 
   await _doShareAction(action, blob, filename, mimeType);
   if(mode === 'pdf') showToast(T.pdfOk || 'PDF généré ✓');
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// V1.3.0 — LISTES DÉROULANTES ET CHAMPS OBLIGATOIRES (PdM 22.10.2026)
+// ═══════════════════════════════════════════════════════════
+// Valeurs enregistrées = codes ci-dessous ; libellés traduits via I18N.
+const LISTS={
+  ctype:[['FE05B2 Bca','tunnel'],['FE05C Cca','evac'],['FE0D Dca','habit'],['EPR-PUR Eca','somo'],['TT Eca',''],['Gdv Eca','immerge'],['Pur-Pur Fca','chantier'],['NN-CLN','']],
+  courbe:[['B'],['C'],['D'],['HPC (gG)'],['K'],['Z'],['Diazed']],
+  idelta:[['10 mA'],['30 mA'],['100 mA'],['300 mA']],
+  champ:[['horaire'],['antihoraire'],['NA']],
+  ddrDesig:[['RCCB'],['RCBO'],['PRCD'],['SRCD'],['CBR'],['AUCUN']],
+  ddrType:[['A'],['EV/MI'],['F'],['B'],['B+']],          // AC interdit
+  regime:[['TN-S'],['TN-C'],['TN-C-S'],['TT rail CFF']]
+};
+function optLabel(list,item){
+  const T=I18N[currentLang],v=item[0];
+  switch(list){
+    case 'ctype':   return item[1]&&T.ctypeUse&&T.ctypeUse[item[1]]?v+' — '+T.ctypeUse[item[1]]:v;
+    case 'courbe':  return (T.courbeOpts&&T.courbeOpts[v])||v;
+    case 'champ':   return (T.champOpts&&T.champOpts[v])||v;
+    case 'ddrDesig':return (T.ddrDesigOpts&&T.ddrDesigOpts[v])||v;
+    case 'ddrType': return (T.ddrTypeOpts&&T.ddrTypeOpts[v])||v;
+    case 'regime':  return (T.regimeOpts&&T.regimeOpts[v])||v;
+    default: return v;
+  }
+}
+const escH=v=>String(v==null?'':v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function optionsHTML(list,value,withOther){
+  const T=I18N[currentLang],items=LISTS[list],known=items.some(it=>it[0]===value);
+  let h=`<option value="" data-k="__choose">${escH(T.optChoose||'—')}</option>`;
+  // Valeur d'un ancien protocole absente de la liste : conservée telle quelle (non perdue, signatures intactes)
+  if(value&&!known&&!withOther)h+=`<option value="${escH(value)}" data-k="__legacy">${escH(value)} (${escH(T.optLegacy||'')})</option>`;
+  h+=items.map(it=>`<option value="${escH(it[0])}">${escH(optLabel(list,it))}</option>`).join('');
+  if(withOther)h+=`<option value="__other" data-k="__other">${escH(T.optOther||'Autre…')}</option>`;
+  return h;
+}
+// Liste fermée : <select id> porte directement la valeur
+function selectHTML(id,list,value){
+  return `<select id="${id}" data-list="${list}">${optionsHTML(list,value,false)}</select>`.replace(`value="${escH(value)}"`,`value="${escH(value)}" selected`);
+}
+// Liste + « Autre… » : la valeur est dans <input id> (masqué sauf « Autre »), le <select> sert au choix
+function comboHTML(id,list,value){
+  const known=LISTS[list].some(it=>it[0]===value),other=!!value&&!known;
+  let sel=optionsHTML(list,value,true);
+  sel=sel.replace(`value="${other?'__other':escH(value)}"`,`value="${other?'__other':escH(value)}" selected`);
+  return `<select id="${id}_sel" data-list="${list}" data-combo="${id}">${sel}</select>`+
+    `<input type="text" id="${id}" class="combo-other" value="${escH(value)}" placeholder="${escH(I18N[currentLang].phOther||'')}" data-ph="phOther" autocomplete="off" style="${other?'':'display:none;'}"/>`;
+}
+document.addEventListener('change',e=>{
+  const sel=e.target;if(!sel.dataset||!sel.dataset.combo)return;
+  const inp=$(sel.dataset.combo);if(!inp)return;
+  if(sel.value==='__other'){inp.style.display='';inp.value='';inp.focus();}
+  else{inp.style.display='none';inp.value=sel.value;}
+},true);
+// Verrouillage (signature) : le <select> d'un combo suit l'état « lecture seule » de son champ
+new MutationObserver(muts=>muts.forEach(m=>{
+  const el=m.target;if(!el.id)return;const sel=$(el.id+'_sel');
+  if(sel&&sel.dataset.combo===el.id){sel.disabled=el.readOnly||el.disabled;sel.style.opacity=el.style.opacity;}
+})).observe(document.body,{subtree:true,attributes:true,attributeFilter:['readonly','disabled']});
+
+function translateLists(){
+  document.querySelectorAll('select[data-list]').forEach(sel=>{
+    const list=sel.dataset.list,T=I18N[currentLang];
+    [...sel.options].forEach(o=>{
+      const k=o.dataset.k;
+      if(k==='__choose')o.textContent=T.optChoose||'—';
+      else if(k==='__other')o.textContent=T.optOther||'Autre…';
+      else if(k==='__legacy')o.textContent=o.value+' ('+(T.optLegacy||'')+')';
+      else{const it=LISTS[list].find(x=>x[0]===o.value);if(it)o.textContent=optLabel(list,it);}
+    });
+  });
+}
+// Champ commun : les <select> à liste fermée gardent une valeur ancienne inconnue
+function setField(f,v){
+  const el=$(f);
+  if(el&&el.tagName==='SELECT'&&el.dataset.list){el.innerHTML=optionsHTML(el.dataset.list,v||'',false);el.value=v||'';return;}
+  // Clé absente d'un ancien protocole : champ vidé (et non « undefined »)
+  if(v===undefined||v===null){const e=$(f);if(e&&e.type!=='checkbox'){e.value='';return;}}
+  sv(f,v);
+}
+function renderCommonSelects(){
+  const el=$('regime_neutre');if(el&&!el.options.length)el.innerHTML=optionsHTML('regime','',false);
+}
+renderCommonSelects();
+
+// R iso. : 2 décimales obligatoires (ex. 156,36) — complétées automatiquement
+function fmtRiso(v){
+  const m=String(v||'').trim().match(/^([<>]=?)?\s*(\d+)(?:[.,](\d*))?$/);
+  if(!m)return null;
+  let dec=(m[3]||'');
+  if(dec.length>2){const n=(parseFloat(m[2]+'.'+dec)).toFixed(2).split('.');return (m[1]||'')+n[0]+','+n[1];}
+  return (m[1]||'')+m[2]+','+dec.padEnd(2,'0');
+}
+const RISO_OK=/^([<>]=?)?\d+[.,]\d{2}$/;
+document.addEventListener('focusout',e=>{
+  const el=e.target;if(!el.id||!/^riso_\d+$/.test(el.id)||el.readOnly||!el.value)return;
+  const f=fmtRiso(el.value);if(f&&f!==el.value){el.value=f;el.dispatchEvent(new Event('input',{bubbles:true}));}
+});
+// Retire le surlignage dès que l'on corrige
+['input','change'].forEach(ev=>document.addEventListener(ev,e=>{
+  const el=e.target;if(!el.classList)return;el.classList.remove('missing');
+  if(el.dataset&&el.dataset.combo){const i=$(el.dataset.combo);if(i)i.classList.remove('missing');}
+  const s=el.id&&$(el.id+'_sel');if(s)s.classList.remove('missing');
+}));
+
+// Contrôle avant PDF : true si tout est rempli ; sinon surligne les champs et ouvre
+// une fenêtre listant les champs manquants (section / circuit + libellé).
+// Les champs verrouillés par une signature ne sont pas contrôlés (données déjà signées).
+function checkRequired(){
+  const T=I18N[currentLang],miss=[];
+  document.querySelectorAll('.missing').forEach(el=>el.classList.remove('missing'));
+  const target=el=>{const s=$(el.id+'_sel')||$(el.id+'-select');return (s&&el.style.display==='none')?s:el;};
+  const locked=el=>el.readOnly||el.disabled;
+  const lblOf=el=>{const box=el.closest('.mf')||el.closest('.f');const l=box&&box.querySelector('label');return l?l.textContent.trim():el.id;};
+  let group='';
+  const need=(id,ok,hint)=>{const el=$(id);if(!el||locked(el))return;const v=(el.value||'').trim();
+    const bad=!v||v==='__other'||(ok&&!ok(v));
+    if(bad)miss.push({el:target(el),group,label:lblOf(el),hint:(v&&v!=='__other'&&hint)?(typeof hint==='function'?hint(v):hint):''});};
+  group=$('sec-install-hd').textContent.trim();
+  ['objet','num_tableau','cc_general','cc_abonne','fournisseur'].forEach(id=>need(id));
+  group=$('sec-mesures-hd').textContent.trim();
+  ['regime_neutre','instrument'].forEach(id=>need(id));
+  if(gv('facteur_icc')==='OUI')need('valeur_facteur',v=>/^\d+([.,]\d+)?$/.test(v),T.reqNumber);
+  circuitIds.filter(id=>!!$('cc-'+id)).forEach((id,i)=>{
+    group=(T.reqCircuit||'Circuit')+' '+(gv('groupe_'+id)||(i+1))+(gv('desig_'+id)?' — '+gv('desig_'+id):'');
+    const r=$('riso_'+id);
+    if(r&&!locked(r)&&r.value){const f=fmtRiso(r.value);if(f)r.value=f;}
+    need('ctype_'+id);need('courbe_'+id);need('riso_'+id,v=>RISO_OK.test(v),T.reqRisoFmt);
+    need('champ_'+id,v=>LISTS.champ.some(x=>x[0]===v),T.reqChooseList);
+    need('ddr_desig_'+id);
+    const desig=gv('ddr_desig_'+id);
+    if(desig&&desig!=='AUCUN'){
+      need('ddr_type_'+id,v=>!/^AC$/i.test(v),T.acForbidden);
+      need('ddr_idelta_'+id,v=>LISTS.idelta.some(x=>x[0]===v),T.reqChooseList);
+      need('ddr_idecl_'+id,v=>/^\d+([.,]\d+)?$/.test(v.replace(/\s*mA$/i,'')),T.reqNumber);
+    }
+  });
+  if(!miss.length)return true;
+  miss.forEach(m=>m.el.classList.add('missing'));
+  showMissingModal(miss);
+  return false;
+}
+function showMissingModal(miss){
+  const T=I18N[currentLang];
+  const old=$('req-modal');if(old)old.remove();
+  const groups=[];miss.forEach((m,i)=>{let g=groups.find(x=>x.name===m.group);if(!g)groups.push(g={name:m.group,items:[]});g.items.push({m,i});});
+  const modal=document.createElement('div');
+  modal.id='req-modal';modal.className='sig-modal-bg';
+  modal.innerHTML=`<div class="sig-modal" style="max-height:80vh;display:flex;flex-direction:column;">
+    <div class="sig-modal-hd"><h3 style="color:var(--red);">⚠️ ${escH(T.reqTitle)}</h3>
+      <button data-close style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">×</button></div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.45;">${escH(T.reqIntro).replace('{n}','<b>'+miss.length+'</b>')}</p>
+    <div style="overflow-y:auto;flex:1;border:1px solid var(--border);border-radius:10px;">
+      ${groups.map(g=>`<div style="background:#e4e8f5;color:var(--navy);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;padding:6px 11px;">${escH(g.name)}</div>`+
+        g.items.map(({m,i})=>`<button data-i="${i}" style="display:block;width:100%;text-align:left;background:#fff;border:none;border-bottom:1px solid #eef0f5;padding:9px 11px;font-size:13px;color:var(--text);cursor:pointer;">• ${escH(m.label)}${m.hint?` <span style="color:var(--red);font-size:11.5px;">— ${escH(m.hint)}</span>`:''}</button>`).join('')).join('')}
+    </div>
+    <button data-close class="sig-btn-ok" style="margin-top:12px;width:100%;">${escH(T.reqOk)}</button>
+  </div>`;
+  const goTo=el=>{modal.remove();el.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>{try{el.focus({preventScroll:true});}catch(e){}},400);};
+  modal.addEventListener('click',e=>{
+    const b=e.target.closest('[data-i]');if(b){goTo(miss[+b.dataset.i].el);return;}
+    if(e.target===modal||e.target.closest('[data-close]'))goTo(miss[0].el);
+  });
+  document.body.appendChild(modal);
 }

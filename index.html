@@ -15,13 +15,13 @@
 <div class="hdr">
   <div class="hdr-top">
     <div class="hdr-logo-row">
-      <div class="hdr-logo"><img src="logo.jpg" alt="SBB CFF FFS" style="height:17px;display:block;"/></div>
+      <div class="hdr-logo"><img src="logo.jpg" alt="SBB CFF FFS" style="height:30px;display:block;"/></div>
     </div>
     <div class="hdr-bottom-row">
       <div class="hdr-title" id="hdr-title">Premières vérifications<br>par l'installateur électricien</div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
         <a href="manuel.pdf" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.5);color:#fff;font-size:11px;font-weight:800;text-decoration:none;line-height:1;" title="Aide / Manuel">?</a>
-        <div style="font-size:9px;color:rgba(255,255,255,.55);font-weight:600;letter-spacing:.5px;">V1.2.6</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.55);font-weight:600;letter-spacing:.5px;">V1.3.0</div>
         <div class="lang-switcher">
           <button class="lang-btn active" onclick="setLang('fr')">FR</button>
           <button class="lang-btn" onclick="setLang('de')">DE</button>
@@ -40,22 +40,21 @@
 <div class="sec">
   <div class="sec-hd" id="sec-install-hd">Identification de l'installation</div>
   <div class="sec-bd">
+    <div class="f"><label id="lbl-objet" class="req">Description des travaux</label><input type="text" id="objet"/></div>
     <div class="f"><label id="lbl-nom-install">Nom et adresse de l'installation</label><textarea id="nom_installation" rows="2"></textarea></div>
     <div class="row2">
-      <div class="f"><label id="lbl-num-tab">N° du tableau</label><input type="text" id="num_tableau" placeholder="Ex: bi-dg04-e10x-001"/></div>
-      <div class="f"><label id="lbl-page">Page</label><input type="text" id="page" placeholder="01"/></div>
+      <div class="f"><label id="lbl-num-tab" class="req">AKS tableau</label><input type="text" id="num_tableau" placeholder="Ex: bi-dg04-e10x-001"/></div>
+      <div class="f"><label id="lbl-page">Page(s) concernée(s)</label><input type="text" id="page" placeholder="01"/></div>
     </div>
     <div class="row2">
-      <div class="f"><label id="lbl-objet">Objet / description des travaux</label><input type="text" id="objet"/></div>
       <div class="f"><label id="lbl-compteur">N° compteur</label><input type="text" id="num_compteur"/></div>
+      <div class="f"><label id="lbl-gires">N° Gires</label><input type="text" id="num_gires"/></div>
     </div>
-    <div style="display:flex;gap:8px;align-items:flex-start;">
-      <div style="display:flex;flex-direction:column;gap:8px;width:25%;flex-shrink:0;">
-        <div class="f" style="margin-bottom:0;"><label id="lbl-cc-gen">C/C général</label><input type="text" id="cc_general" placeholder="Ex: NH00 160A"/></div>
-        <div class="f" style="margin-bottom:0;"><label id="lbl-cc-abo">C/C abonné</label><input type="text" id="cc_abonne" placeholder="Ex: NH00 100A"/></div>
-      </div>
-      <div class="f" style="flex:1;margin-bottom:0;"><label id="lbl-fournisseur">Fournisseur</label><input type="text" id="fournisseur" placeholder="Ex: Romande Energie, EWZ..."/></div>
+    <div class="row2">
+      <div class="f"><label id="lbl-cc-gen" class="req">C/C général (type, calibre)</label><input type="text" id="cc_general" placeholder="Ex: NH00 160A"/></div>
+      <div class="f"><label id="lbl-cc-abo" class="req">C/C avant-compteur</label><input type="text" id="cc_abonne" placeholder="Ex: NH00 100A"/></div>
     </div>
+    <div class="f"><label id="lbl-fournisseur" class="req">Réseau (GRD)</label><input type="text" id="fournisseur" placeholder="Ex: Romande Energie, EWZ..."/></div>
     <div class="f" style="margin-top:8px;margin-bottom:0;"><label id="lbl-remarques-install">Remarques</label><textarea id="remarques_install" rows="2" placeholder=""></textarea></div>
   </div>
 </div>
@@ -64,16 +63,22 @@
 <div class="sec">
   <div class="sec-hd" id="sec-mesures-hd">Paramètres de mesure</div>
   <div class="sec-bd">
-    <div class="row3">
+    <div class="row2">
       <div class="f"><label id="lbl-tension">Tension réseau</label><input type="text" id="tension" value="240V" placeholder="Ex: 240V"/></div>
-      <div class="f"><label id="lbl-instrument">Instrument</label><input type="text" id="instrument" value="Metrel"/></div>
-      <div class="f"><label id="lbl-inventaire">N° inventaire</label><input type="text" id="num_inventaire" placeholder="Ex: I-68266"/></div>
+      <div class="f"><label id="lbl-regime" class="req">Régime de neutre</label><select id="regime_neutre" data-list="regime"></select></div>
     </div>
     <div class="row2">
-      <div class="f"><label id="lbl-facteur">Facteur Icc</label>
+      <div class="f"><label id="lbl-instrument" class="req">Instrument(s) de mesure</label><input type="text" id="instrument" value="Metrel"/></div>
+      <div class="f"><label id="lbl-inventaire">N° inventaire</label><input type="text" id="num_inventaire" placeholder="Ex: I-68266"/></div>
+    </div>
+    <div class="f"><label id="lbl-instr-autres">Autres appareils de mesure</label>
+      <div class="row2"><input type="text" id="instrument2" data-ph="phInstrAutre" placeholder="Autre appareil (saisie libre)..."/><input type="text" id="instrument3" data-ph="phInstrAutre" placeholder="Autre appareil (saisie libre)..."/></div>
+    </div>
+    <div class="row2">
+      <div class="f"><label id="lbl-facteur">Facteur Icc utilisé</label>
         <select id="facteur_icc"><option value="NON">NON</option><option value="OUI" selected>OUI</option></select>
       </div>
-      <div class="f"><label id="lbl-val-facteur">Valeur facteur</label><input type="number" id="valeur_facteur" value="1" min="0.1" step="0.1"/></div>
+      <div class="f"><label id="lbl-val-facteur" class="req">Valeur facteur</label><input type="text" inputmode="decimal" id="valeur_facteur" value="1" list="facteur-list" autocomplete="off"/><datalist id="facteur-list"><option value="1,00"/><option value="0,80"/><option value="0,75"/></datalist></div>
     </div>
   </div>
 </div>

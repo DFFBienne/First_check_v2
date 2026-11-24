@@ -1,6 +1,28 @@
 # Changelog — Protocole Premières Vérifications SBB CFF FFS
 
 ---
+## V1.3.0 — 2026-11-10
+
+Remarques officielles de la séance PdM du 22.10.2026.
+
+### Modifié
+- **En-tête** : logo et titre « Premières vérifications » agrandis (app et PDF).
+- **Identification** : « Description des travaux » en premier ; « N° du tableau » → « AKS tableau » ; « Page » → « Page(s) concernée(s) » ; « C/C général (type, calibre) » ; « Fournisseur » → « Réseau (GRD) » ; « C/C abonné » → « C/C avant-compteur ».
+- **Paramètres** : « Facteur Icc utilisé » avec valeurs proposées (1,00 / 0,80 / 0,75) ou saisie libre ; « Instrument(s) de mesure » obligatoire (liste des appareils du profil, comme avant).
+- **Circuits** : listes déroulantes pour le type de câble (FE05B2, FE05C, FE0D, EPR-PUR, TT, Gdv, Pur-Pur, NN-CLN + Autre), la courbe (B, C, D, HPC (gG), K, Z, Diazed + Autre), IΔn (10/30/100/300 mA) et le champ tournant (sens horaire / anti-horaire / N.A). R iso. à 2 décimales, complétées automatiquement. Aide « i » des câbles mise à jour.
+
+### Ajouté
+- Champs « N° Gires » et « Régime de neutre » (TN-S, TN-C, TN-C-S, TT rail CFF).
+- **Plusieurs appareils par protocole** : en plus de « Instrument », 2 listes « Autres appareils de mesure » proposant les appareils du profil (+ « — aucun — » / « Autre… »).
+- DDR : « Désignation » (RCCB, RCBO, PRCD, SRCD, CBR, Aucun DDR), « Type » (A, EV/MI, F, B, B+ ; AC interdit), « Courant de déclenchement (mA) ».
+- **Champs obligatoires** (marqués *) : la génération du PDF est bloquée tant qu'il en manque ; une fenêtre liste les champs manquants par section / circuit (toucher un champ pour y aller) et ils sont surlignés. Les champs verrouillés par une signature ne sont pas contrôlés.
+- PDF : colonnes « Désign. / type » et « I décl. (mA) », bandeau sur 3 lignes, régime de neutre et autres appareils dans les paramètres.
+
+### Compatibilité
+- Anciens protocoles et JSON lisibles ; les valeurs hors liste sont conservées (« ancienne valeur »).
+- Les nouveaux champs ne sont enregistrés que s'ils sont remplis : les signatures électroniques des protocoles existants restent valides.
+
+---
 ## V1.2.6 — 2026-11-04
 
 ### Corrigé
